@@ -1,0 +1,39 @@
+
+<form class = "eventsFilter" action="" method="GET">
+    <div class="search-bar">
+        <p>SEARCH EVENTS</p>
+        <div class="search-container">
+            <input type="text" name="search" id="nameFilter" value="<?php echo $searchQuery; ?>">
+            <button type="submit" id="searchButton">
+                <div class="button">
+                    <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="m24 21-5.6-5.6A10.058 10.058 0 0 0 20 10a10 10 0 1 0-10 10 10.058 10.058 0 0 0 5.4-1.6L21 24l3-3zM4 10a6 6 0 1 1 6 6 5.89 5.89 0 0 1-6-6z" fill="#0F1923" stroke="none" stroke-width="0"></path>
+                    </svg>
+                </div>
+            </button>
+        </div>
+    </div>
+    <div class="searchWrapper">
+        <div class="eventNameFilter">
+            <label for="sort_by_name"></label>
+<!--            <label for="sort_by_name">Sort by Event Name:</label>-->
+<!--            <select name="sort_by_name" id="sort_by_name">-->
+            <select name="sort_by_name" id="sort_by_name">
+                <option value="default" <?php if ($sortByName === 'default') echo 'selected'; ?>>Default</option>
+                <option value="asc" <?php if ($sortByName === 'asc') echo 'selected'; ?>>Ascending</option>
+                <option value="desc" <?php if ($sortByName === 'desc') echo 'selected'; ?>>Descending</option>
+            </select>
+        </div>
+        <div class="eventStatusFilter">
+<!--            <label for="sort_by_status"></label>-->
+            <label for="sort_by_status"></label>
+            <select name="sort_by_status" id="sort_by_status">
+                <option value="default" <?php if ($sortByStatus === 'default') echo 'selected'; ?>>Default</option>
+                <option value="ongoing" <?php if ($sortByStatus === 'ongoing') echo 'selected'; ?>>Ongoing</option>
+                <option value="upcoming" <?php if ($sortByStatus === 'upcoming') echo 'selected'; ?>>Upcoming</option>
+                <option value="done" <?php if ($sortByStatus === 'done') echo 'selected'; ?>>Done</option>
+            </select>
+        </div>
+        <input class = "filterButton" type="submit" value="Apply Filters">
+    </div>
+</form>

@@ -1,0 +1,14 @@
+title Session Participants
+
+h1 Participants
+if participants.length > 0
+  table
+    thead
+      tr
+        th 
+    tbody
+      each participant in participants
+        tr
+          td #{participant.lastName}, #{participant.firstName}
+else
+  p No participants for this session

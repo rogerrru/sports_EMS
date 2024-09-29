@@ -1,0 +1,33 @@
+head
+    title Events List
+    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+body
+    include menu
+      
+    form(action='/searchEvent', method='GET', class='formSearch')
+        input(type='text', name='search', id='search')
+        button(type='submit') ⌕
+
+    a.button(href=`/createEvent`) Create
+      
+    table(class="eventsTable")
+        thead
+        tr
+            th Name
+            th Description
+            th Status
+
+        tbody
+        each event in events
+            tr
+            td= event.eventName
+            td= event.description
+            td= event.eventStatus
+            td
+              a(href=`/updateEvent/${event.eventID}`) ✎
+            td 
+              a(href=`/deleteEvent/${event.eventID}`) ✖  
+            td
+              a(href=`/readEvent/${event.eventID}`) >
+      
+    include footer

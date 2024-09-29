@@ -1,0 +1,27 @@
+head
+    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+include menu
+
+title Departments List
+
+form(action='/searchDepartment', method='GET', class='formSearch')
+    input(type='text', name='search', id='search')
+    button(type='submit') ⌕
+
+a.button(href='/createDepartment') Create
+
+table
+    thead
+    tr
+        th Name
+        th Description
+
+    tbody
+    each department in departments
+        tr
+        td= department.depName
+        td= department.depDesc
+        td
+          a(href=`/updateDepartment/${department.depID}`) ✎
+        td
+          a(href=`/deleteDepartment/${department.depID}`) ✖

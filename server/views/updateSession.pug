@@ -1,0 +1,50 @@
+head
+    title Update Session
+    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+include menu
+
+// Add formatTime function
+- function formatTime(time) {
+  - const date = new Date(time);
+  - const hours = date.getHours().toString().padStart(2, '0');
+  - const minutes = date.getMinutes().toString().padStart(2, '0');
+  - return `${hours}:${minutes}`;
+- }
+
+form(action=`/updateSession/${event.eventID}/${session.sessionID}`, method='POST', class='form')
+    label(for='sessionDesc') Session Description:
+    input(type='text', name='sessionDesc', id='sessionDesc', value=session.sessionDesc, required)
+
+    label(for='firstDay') First Day:
+    select(name='firstDay', id='firstDay')
+        each schedule in schedules
+            - const startDate = new Date(schedule.startDate);
+            - const endDate = new Date(schedule.endDate);
+            - const currentDate = new Date(startDate);
+
+            while (currentDate <= endDate) 
+                - const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+                option(value=formattedDate, selected=currentDate.getTime() === new Date(session.firstDay).getTime()) #{formattedDate}
+                - currentDate.setDate(currentDate.getDate() + 1);
+
+    label(for='lastDay') Last Day:
+    select(name='lastDay', id='lastDay')
+        each schedule in schedules
+            - const startDate = new Date(schedule.startDate);
+            - const endDate = new Date(schedule.endDate);
+            - const currentDate = new Date(startDate);
+
+            while (currentDate <= endDate) 
+                - const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+                option(value=formattedDate, selected=currentDate.getTime() === new Date(session.lastDay).getTime()) #{formattedDate}
+                - currentDate.setDate(currentDate.getDate() + 1);
+
+    label(for='startTime') Start Time:
+    input(type='time', name='startTime', id='startTime', value=formatTime(session.startTime), required)
+
+    label(for='endTime') End Time:
+    input(type='time', name='endTime', id='endTime', value=formatTime(session.endTime), required) 
+
+    button(type='submit') Save
+
+include footer

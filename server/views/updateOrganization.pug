@@ -1,0 +1,18 @@
+head
+    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+include menu
+
+title #{organization.orgName} - Update
+
+form(action=`/updateOrganization/${organization.orgID}`, method='POST', class='form')
+    label(for='orgName') Organization Name:
+    input(type='text', name='orgName', id='orgName', value=organization.orgName, required)
+
+    label(for='SLUorg') Is this an SLU organization?
+    select(name='SLUorg', id='SLUorg', required)
+        option(value='1', selected=organization.SLUorg === '1') Yes
+        option(value='0', selected=organization.SLUorg === '0') No
+
+    button(type='submit') Save
+
+include footer

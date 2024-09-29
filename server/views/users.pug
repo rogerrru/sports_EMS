@@ -1,0 +1,31 @@
+head
+    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+include menu
+
+title User Accounts
+
+form(action='/searchUser', method='GET', class='formSearch')
+    input(type='text', name='search', id='search')
+    button(type='submit') ⌕
+
+a.button(href='/createUser') Create
+
+table
+    thead
+    tr
+        th ID
+        th First Name
+        th Last Name
+
+    tbody
+    each user in users
+        tr
+        td= user.userID
+        td= user.firstName
+        td= user.lastName
+        td
+           a(href=`/updateUser/${user.userID}`) ✎
+        td
+           a(href=`/deleteUser/${user.userID}`) ✖
+        td
+           a(href=`/readUser/${user.userID}`) >

@@ -1,0 +1,17 @@
+head
+    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+include menu
+
+title Create Organization
+
+form(action='/createOrganization', method='POST', class='form')
+    label(for='orgName') Organization Name:
+    input(type='text', name='orgName', id='orgName', required)
+
+    label(for='SLUorg') Is this an SLU organization?
+        select(name='SLUorg', id='SLUorg', required)
+            option(value='1') Yes
+            option(value='0') No
+
+    button(type='submit') Add
+include footer

@@ -1,0 +1,16 @@
+head
+    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+    title Create Department
+
+body
+    include menu
+    form(action='/createDepartment', method='POST', class='form')
+        label(for='depName') Department Name:
+        input(type='text', name='depName', id='depName', required)
+
+        label(for='depDesc') Department Description:
+        textarea(name='depDesc', id='depDesc', rows='4', required)
+
+        button(type='submit') Add
+    include footer
+

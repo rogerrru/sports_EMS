@@ -1,0 +1,83 @@
+head
+    title #{event.eventName} - Update
+    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+
+include menu
+
+form(action=`/updateEvent/${event.eventID}`, method='POST', enctype='multipart/form-data', class='form')
+    label(for='eventName') Event Name:
+    input(type='text', name='eventName', id='eventName', value=event.eventName, required)
+
+    label(for='description') Description:
+    textarea(name='description', id='description', rows='4', required)= event.description
+
+    label(for='event_img') Event Image:
+    input(type='file', name='event_img', id='event_img') 
+    if event.event_img
+       img(src='data:image/jpeg;base64, ' + event.event_img, alt='Event Image')
+    else 
+        p 
+
+    label(for='eventStatus') Status:
+    select(name='eventStatus', id='eventStatus', required)
+        option(value='upcoming', selected=event.eventStatus === 'upcoming') Upcoming
+        option(value='ongoing', selected=event.eventStatus === 'ongoing') Ongoing
+        option(value='done', selected=event.eventStatus === 'done') Done
+
+    label(for='eventCategory') Category:
+    select(name='eventCategory', id='eventCategory', required)
+        option(value='open', selected=event.eventCategory === 'open') Open
+        option(value='university', selected=event.eventCategory === 'university') University
+        option(value='departmental', selected=event.eventCategory === 'departmental') Departmental
+        option(value='organizational', selected=event.eventCategory === 'organizational') Organizational
+
+    div(id='departmentSection' style='display: block;')
+        label(for='depID') Department:
+        select(name='depID', id='depID')
+            option(value='') None
+            each department in departments
+                option(value=department.depID, selected=event.depID === department.depID) #{department.depName}
+    
+    div(id='organizationSection' style='display: block;')
+        label(for='orgID') Organization:
+        select(name='orgID', id='orgID')
+            option(value='') None
+            each org in organizations
+                option(value=org.orgID, selected=event.orgID === org.orgID) #{org.orgName}
+    
+    div(id='scheduleSection' style='display: block;')
+        label(for='scheduleID') Schedule:
+        select(name='scheduleD', id='scheduleID')
+            option(value='') None
+            each schedule in schedules
+                - const formattedStartDate = `${schedule.startDate.getFullYear()}-${String(schedule.startDate.getMonth() + 1).padStart(2, '0')}-${String(schedule.startDate.getDate()).padStart(2, '0')}`;
+                - const formattedEndDate = `${schedule.endDate.getFullYear()}-${String(schedule.endDate.getMonth() + 1).padStart(2, '0')}-${String(schedule.endDate.getDate()).padStart(2, '0')}`;
+                option(value=schedule.scheduleID, selected=event.scheduleID == schedule.scheduleD) #{formattedStartDate} - #{formattedEndDate}
+
+    div(id='venuesSection' style='display: block;')
+        label(for='venueID') Venue:
+        select(name='venueID', id='venueID')
+            option(value='') None
+            each venue in venues
+                option(value=venue.venueID, selected=event.venueID === venue.venueID) #{venue.venueName} - #{venue.venueAddress}
+    
+    if event.sessionIDs.length > 0
+        table
+            thead
+                tr
+                th Session
+                th Day/s
+                th Time
+            tbody
+                each sessionId, index in event.sessionIDs
+                    tr
+                        td #{event.sessionDescs[index]}
+                        td #{event.firstDays[index]} - #{event.lastDays[index]}
+                        td #{event.startTimes[index]} - #{event.endTimes[index]}
+                        td
+                            a(href=`/updateSession/${event.eventID}/${sessionId}`) Edit 
+                            a(href=`/deleteSession/${event.eventID}/${sessionId}`) Delete
+    else
+        p No sessions available for this event
+    button(type='submit') Save
+include footer

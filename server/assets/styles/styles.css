@@ -1,0 +1,272 @@
+nav {
+    height: 60px;
+    position: sticky;
+    z-index: 100;
+    top: 0;
+    background-color:  #284387;
+}
+
+nav #logo {
+    float: left;
+    margin: 10px;
+    height: 50px;
+}
+
+nav p {
+    margin-top: 20px;
+    float: right;
+    font-family: 'Proxima Nova', sans-serif;
+    display: inline;
+    list-style-type: none;
+    padding-right: 20px;
+}
+
+nav p a {
+    color: #fff;
+    text-decoration: none;
+}
+
+nav p a:hover,
+nav p a:active,
+nav p a:focus {
+    text-decoration: underline;
+    transition-duration: ease 0.5s;
+    color: #e6da00; 
+}
+
+body {
+    font-family: 'Proxima Nova', sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+h1 {
+    color: #284387;
+    text-align: center;
+    margin-top: 20px;
+}
+
+h2 {
+    font-size: 30px;
+    color: #000000;
+    padding: 10px;
+    margin-left: 10px;
+}
+
+body a {
+    color: #284387;
+    text-decoration: none;
+    display: flex; 
+    align-items: center; 
+}
+
+.formSearch {
+    display: flex;
+    text-align: right;
+    margin-right: 10px;
+    margin-top: 5px;
+    float: right;
+    margin-bottom: 10px;
+}
+
+input {
+    border-radius: 10px;
+    border-color: #efeff0;
+    padding: 8px;
+    font-size: 16px;
+    width: 500px;
+    height: 50px;
+}
+
+a.button, button[type='button'] {
+    float: left;
+    margin-top:8px;
+    margin-right: 10px;
+    padding: 10px 20px;
+    font-size: 15px;
+    background-color: #efeff0;
+    color: #1b1b1b;
+    text-decoration: 900;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+a.button:hover, button[type='button']:hover {
+    color: #fff;
+    background-color: #284387;
+}
+
+button[type='submit'] {
+    float: bottom;
+    margin-top:8px;
+    margin-right: 10px;
+    padding: 10px 20px;
+    font-size: 15px;
+    background-color: #efeff0;
+    color: #1b1b1b;
+    text-decoration: 900;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    padding-top: 10px;
+}
+
+button[type='submit']:hover {
+    color: #fff;
+    background-color: #284387;
+}
+
+table {
+    width: 90%;
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+thead {
+    background-color: #284387;
+    color: #fff;
+    margin-bottom: 10px; /* Add margin to the bottom of the header */
+}
+
+thead th:hover {
+    background-color: inherit; /* Prevent color change on hover */
+    color: inherit; /* Prevent text color change on hover */
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+    border-radius: 40px;
+    border: #fff;
+    overflow: hidden;
+}
+
+tbody tr:hover {
+    background-color: #f2f2f2;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+tbody td a{
+    font-size: 20px;
+    color: #284387;
+    text-decoration: none;
+}
+
+tbody td ab {
+    font-size: 30px;
+    color: #284387;
+    text-decoration: none;
+}
+
+tbody td a:hover {
+    color: #1B1B1B;
+    /* font-weight: bold; */
+}
+
+tbody td ab:hover {
+    color: #1B1B1B;
+    font-weight: bold;
+}
+
+tbody td n {
+    font-weight: bold;
+}
+/*scanner css*/
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#reader {
+    width: 600px;
+}
+#result {
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+select {
+    width: 300px;
+}
+
+.form {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form input[type='text'],
+.form textarea,
+.form select,
+.form input[type='file'] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.form textarea {
+    resize: vertical;
+    overflow-y: auto
+    ;
+}
+
+.accountContainer {
+    display: flex;
+
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 25px;
+}
+
+ul.list1 {
+    font-weight: bold;
+    margin-left: 60px;
+}
+
+ul.list2 {
+    margin-left: 30px;
+}
+
+img {
+    display: block;
+    margin: 0 auto;
+    width: 500px; 
+    height: auto;
+  }
+
+
+.footer {
+    background-color: #192d5f;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    margin-top: auto;
+  }
+  
+.footer i.fas.fa-copyright {
+margin-right: 5px;
+}
+  
+.footer p.p2 {
+font-size: 14px;
+margin-top: 5px;
+}  

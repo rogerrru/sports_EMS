@@ -1,0 +1,25 @@
+head
+    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+include menu
+
+title Organizations List
+
+form(action='/searchOrganization', method='GET', class='formSearch')
+    input(type='text', name='search', id='search')
+    button(type='submit') ⌕
+
+a.button(href='/createOrganization') Create
+
+table
+    thead
+    tr
+        th Name
+
+    tbody
+    each organization in organizations
+        tr
+        td= organization.orgName
+        td
+          a(href=`/updateOrganization/${organization.orgID}`) ✎
+        td
+          a(href=`/deleteOrganization/${organization.orgID}`) ✖

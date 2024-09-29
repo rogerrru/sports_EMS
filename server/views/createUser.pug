@@ -1,0 +1,21 @@
+head
+    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+include menu
+
+title Create User Account
+
+form(action='/createUser', method='POST', class='createForm', class='form')
+    label(for='firstName') First Name:
+    input(type='text', name='firstName', id='firstName', required)
+
+    label(for='lastName') Last Name:
+    input(type='text', name='lastName', id='lastName', required)
+
+    label(for='email') Email Address:
+    input(type='text', name='email', id='email', required)
+
+    label(for='password') Password:
+    input(type='text', name='password', id='password', required)
+
+    button(type='submit') Add
+include footer

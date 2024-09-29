@@ -1,0 +1,53 @@
+<section class = "indexPageWelcome">
+<div class="info">
+    <div class = "infoContainer">
+        <div class = "welcomeInfo">
+            <p>Welcome to SLU's</p>
+            <div>
+                <h1 class = "eventsP">Events</h1>
+                <h1 class = "websiteP">Website</h1>
+            </div>
+            <p>Find and join exciting events near you!</p>
+        </div>
+        <div class = "registerButton">
+            <?php
+            // Check if the user is logged in
+            if (isset($_SESSION['userDet'])) {
+            // Redirect to the events page if logged in
+            echo '<button><a href="./events.php"><p>REGISTER EVENTS!</p></a></button>';
+            } else {
+            // Redirect to the signup page if not logged in
+            echo '<button><a href="./signup.php"><p>REGISTER NOW!</p></a></button>';
+            }
+            ?>
+        </div>
+    </div>
+</div>
+</section>
+<section class = "latestEvents">
+    <div class="newsContainer">
+        <header>
+            <div class="newsHeader">
+                <h2 class = "newsText">
+                    <span>LATEST EVENTS</span>
+                </h2>
+                <a href="./events.php">
+                    <p>EVENTS PAGE</p>
+                    <div class="arrowIcon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 15"><path d="M16.2.5 19.9 4m4.6 3.5-8.3 7" fill="none" stroke="#ff4655"></path><path fill="none" stroke="#ff4655" stroke-miterlimit="10" d="M16 7.5H0"></path></svg>
+                    </div>
+                </a>
+            </div>
+            <div class = "newsItemsContainer">
+                <div class = "newsItems">
+                    <?php
+                        require('db.php');
+                        $conn = OpenCon();
+                        include('latest_events.php');
+                        displayLatestEvents($conn);
+                    ?>
+                </div>
+            </div>
+        </header>
+    </div>
+</section>

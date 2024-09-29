@@ -1,0 +1,66 @@
+head 
+  title #{event.eventName} - Details
+  link(rel='stylesheet', href='/styles/readEvent.css')
+  script(src='/scripts/readEvent.js')
+
+include menu
+
+body 
+  head
+  link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+  
+  h1 #{event.eventName}
+  img(src='data:image/jpeg;base64, ' + event.event_img, alt='Event Image')
+
+  p #{event.description}
+  p Status: #{event.eventStatus}
+  p Category: #{event.eventCategory}
+
+  - if (event.departmentName)
+    p Department: #{event.departmentName} - #{event.departmentDesc}
+  - else 
+    p
+  
+  - if (event.organizationName)
+    p Organization: #{event.organizationName}
+  - else 
+    p
+
+  - if (event.startDate)
+    - const formattedStartDate = `${event.startDate.getFullYear()}-${String(event.startDate.getMonth() + 1).padStart(2, '0')}-${String(event.startDate.getDate()).padStart(2, '0')}`;
+    - const formattedEndDate = `${event.endDate.getFullYear()}-${String(event.endDate.getMonth() + 1).padStart(2, '0')}-${String(event.endDate.getDate()).padStart(2, '0')}`;
+    p Schedule: #{formattedStartDate} - #{formattedEndDate}
+  - else
+    p Schedule: No available schedule
+  
+  - if (event.venueName)
+    p Venue: #{event.venueName} - #{event.venueAddress}
+  - else 
+    p Venue: No available venue
+
+  a(href=`/createSession/${event.eventID}`)
+    button(type='button') Create New Session
+
+  if event.sessionIDs.length > 0
+    table
+      thead
+        tr
+          th Session
+          th Day/s
+          th Time
+      tbody
+        each sessionId, index in event.sessionIDs
+          tr
+            td #{event.sessionDescs[index]}
+            td #{event.firstDays[index]} - #{event.lastDays[index]}
+            td #{event.startTimes[index]} - #{event.endTimes[index]}
+            td
+              a(href=`javascript:void(0);`, onclick=`openParticipantsPopup(${event.eventID}, ${sessionId})`) View Participants
+              a(href=`/scanner/${event.eventID}/${sessionId}`) Open Session
+  else
+    p No sessions available for this event
+
+  include footer
+
+
+    

@@ -1,0 +1,85 @@
+<!-- HTML Structure -->
+<div class="user-section" id="eventsRegistered">
+    <!-- Events Registered Section -->
+    <div class="user-section-infoContainerevents">
+        <div class="user-section-info">
+            <h3>Events Registered</h3>
+            <p>This section contains information about the events you have registered for. <br>
+                <label for="sortEvents">Event Status:</label>
+                <select id="sortEvents">
+                    <option value="upcoming">Upcoming</option>
+                    <option value="ongoing">Ongoing</option>
+                    <option value="done">Done</option>
+                    <option value="all" selected>All</option>
+                </select>
+            </p>
+
+        </div>
+    </div>
+    <div class="user-section-itemsContainerevents">
+        <div class="user-section-items">
+            <?php
+            if (empty($registeredEvents)) {
+                echo '<div id="noEventsMessage">Not Registered with any Event at the Moment</div>';
+        } else {
+        foreach ($registeredEvents as $event) {
+        $eventID = $event['eventID'];
+        $qrImg = displayQR($eventID, $userID, $conn);
+        $eventStatus = $event['eventStatus'];
+
+        echo '<form id="eventForm_' . $event['eventRegID'] . '" class="grid-item" data-status="' . $eventStatus . '" action="update_personal_info.php" method="post">
+        <h1>' . $event['eventName'] . '</h1>
+        <h3>' . $event['eventStatus'] . '</h3>
+        <h3>Start Date: ' . ($event['startDate'] !== null ? $event['startDate'] : 'No date yet.') . '</h3>
+        <h3>Venue Name: ' . ($event['venueName'] !== null ? $event['venueName'] : 'No Venue yet.') . '</h3>
+        <h3>Venue Address: ' . ($event['venueAddress'] !== null ? $event['venueAddress'] : 'No Venue Address yet.') . '</h3>
+        <p>' . $event['description'] . '</p>
+        <div>
+            <button class="toggleQR" onclick="showQRCode(event)">Show QR Code</button>
+            <img class="qrImage" src="' . $qrImg . '" alt="QR Code" style="display: none;"> <!-- Initially hidden -->
+        </div>
+        <input type="hidden" name="eventRegID" value="' . $event['eventRegID'] . '">
+        <input class="submitButton" type="submit" name="forfeitEvent" value="Forfeit">
+    </form>';
+        }
+        }
+        ?>
+    </div>
+    <div id="noEventsPrompt" style="display: none;">
+        <h1>No events found for the selected status.</h1>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sortEventsDropdown = document.getElementById('sortEvents');
+        const eventItems = document.querySelectorAll('.grid-item');
+        const noEventsPrompt = document.getElementById('noEventsPrompt');
+        const noEventsMessage = document.getElementById('noEventsMessage');
+
+        sortEventsDropdown.addEventListener('change', function () {
+            const selectedValue = sortEventsDropdown.value;
+            let hasEvents = false;
+
+            eventItems.forEach(function (eventItem) {
+                const eventStatus = eventItem.getAttribute('data-status');
+
+                if (selectedValue === 'all' || selectedValue === eventStatus) {
+                    eventItem.style.display = 'block';
+                    hasEvents = true;
+                } else {
+                    eventItem.style.display = 'none';
+                }
+            });
+
+            if (!hasEvents) {
+                noEventsPrompt.style.display = 'block';
+                noEventsMessage.style.display = 'none';
+            } else {
+                noEventsPrompt.style.display = 'none';
+                noEventsMessage.style.display = 'none'; // Hide the message when events are present
+            }
+        });
+    });
+</script>

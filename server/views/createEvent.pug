@@ -1,0 +1,65 @@
+head
+    title Create Event
+    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+
+include menu
+
+form(action='/createEvent', method='POST', enctype='multipart/form-data', class='form')
+    label(for='eventName') Event Name:
+    input(type='text', name='eventName', id='eventName', required)
+
+    label(for='description') Description:
+    textarea(name='description', id='description', rows='4', required)
+
+    label(for='event_img') Event Image:
+    input(type='file', name='event_img', id='event_img')
+
+    label(for='eventCategory') Category:
+    select(name='eventCategory', id='eventCategory', required)
+        option(value='organizational') Organizational
+        option(value='departmental') Departmental
+        option(value='university') University
+        option(value='open') Open
+
+    label(for='eventStatus') Status:
+    select(name='eventStatus', id='eventStatus', required)
+        option(value='upcoming') Upcoming
+        option(value='ongoing') Ongoing
+        option(value='done') Done
+
+    div(id='departmentSection' style='display: block;')
+        label(for='depID') Department:
+        select(name='depID', id='depID')
+            option(value='') None
+            each department in departments
+                option(value=department.depID) #{department.depName}
+    
+    div(id='organizationSection' style='display: block;')
+        label(for='orgID') Organization:
+        select(name='orgID', id='orgID')
+            option(value='') None
+            each org in organizations
+                option(value=org.orgID) #{org.orgName}
+
+    div(id='scheduleSection' style='display: block;')
+        label(for='scheduleID') Schedule:
+        select(name='scheduleID', id='scheduleID')
+            option(value='') None
+            each schedule in schedules
+                - const formattedStartDate = `${schedule.startDate.getFullYear()}-${String(schedule.startDate.getMonth() + 1).padStart(2, '0')}-${String(schedule.startDate.getDate()).padStart(2, '0')}`;
+                - const formattedEndDate = `${schedule.endDate.getFullYear()}-${String(schedule.endDate.getMonth() + 1).padStart(2, '0')}-${String(schedule.endDate.getDate()).padStart(2, '0')}`;
+                option(value=schedule.scheduleID) #{formattedStartDate} - #{formattedEndDate} 
+        a(href='/createSchedule') Create New Schedule
+
+    div(id='venuesSection' style='display: block;')
+        label(for='venueID') Venue:
+        select(name='venueID', id='venueID')
+            option(value='') None
+            each venue in venues
+                option(value=venue.venueID) #{venue.venueName} - #{venue.venueAddress}
+        a(href='/createVenue') Create New Venue 
+        
+    button(type='submit') Add
+
+include footer
+    

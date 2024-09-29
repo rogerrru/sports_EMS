@@ -1,0 +1,91 @@
+<div class="wrapper">
+    <h2>Registration</h2>
+    <form action="./signup.php" method="post" onsubmit="return validateForm()">
+        <div class="input-box" required >
+            <input name="firstName" pattern="[A-Za-z]+( [A-Za-z]+)*" placeholder="Enter your First Name *" required
+                   title="Please enter only alphabets and spaces" type="text">
+        </div>
+        <div class="input-box" required>
+            <input name="lastName" pattern="[A-Za-z]+( [A-Za-z]+)*" placeholder="Enter your Last Name *" required
+                   title="Please enter only alphabets and spaces" type="text">
+        </div>
+        <div class="dropdown">
+            <p>
+                <select class="dropdown-btn" name="depName" required>
+                    <option disabled selected value="">Select Department *</option>
+                    <?php foreach (getDepartments() as $department) : ?>
+                    <option class="dropdown-item"
+                            value="<?php echo $department['depID']; ?>"><?php echo $department['depName']; ?></option>
+                    <?php endforeach; ?>
+                    <option class="dropdown-item" value="">Not Part of Any Departments</option>
+                </select>
+            </p>
+        </div>
+        <div class="dropdown">
+            <p>
+                <select class="dropdown-btn" name="orgName" required>
+                    <option disabled selected value="">Select Organization *</option>
+                    <?php foreach (getOrganizations() as $organization) : ?>
+                    <option class="dropdown-item"
+                            value="<?php echo $organization['orgID']; ?>"><?php echo $organization['orgName']; ?></option>
+                    <?php endforeach; ?>
+                    <option class="dropdown-item" value="">Not Part of Any Organizations</option>
+                </select>
+            </p>
+        </div>
+        <div class="input-box">
+            <input name="email" pattern="^\S.*\S$" placeholder="Enter your Email *" required
+                   title="Invalid input. No leading or trailing spaces allowed." type="text">
+        </div>
+        <div class="input-box">
+            <input name="password" pattern="^\S.*\S$" placeholder="Create password *" required
+                   title="Invalid input. No leading or trailing spaces allowed." type="password">
+        </div>
+        <div class="input-box">
+            <input name="reenterPassword" pattern="^\S.*\S$" placeholder="Confirm password *" required
+                   title="Invalid input. No leading or trailing spaces allowed." type="password">
+        </div>
+        <div class="policy">
+            <input required type="checkbox">
+            <h3>I accept all terms & condition *</h3>
+        </div>
+        <div class="input-box button">
+            <input type="Submit" value="Register Now">
+        </div>
+        <div class="text">
+            <h3>Already have an account? <a href="./html/login_form.html">Login now</a></h3>
+        </div>
+    </form>
+</div>
+<script>
+    function validateForm() {
+        var firstName = document.getElementsByName('firstName')[0].value;
+        var lastName = document.getElementsByName('lastName')[0].value;
+        var password = document.getElementsByName('password')[0].value;
+        var reenterPassword = document.getElementsByName('reenterPassword')[0].value;
+
+        // Regular expression to match alphabets with spaces for multiple words
+        var alphabetSpaceRegex = /^[A-Za-z]+(?:\s[A-Za-z]+)*$/;
+
+        // Validate first name
+        if (!alphabetSpaceRegex.test(firstName)) {
+            alert("Please enter only alphabets for the First Name");
+            return false;
+        }
+
+        // Validate last name
+        if (!alphabetSpaceRegex.test(lastName)) {
+            alert("Please enter only alphabets for the Last Name");
+            return false;
+        }
+
+        // Validate password match
+        if (password !== reenterPassword) {
+            alert("Passwords do not match. Please re-enter the passwords.");
+            return false;
+        }
+
+        return true;
+    }
+</script>
+

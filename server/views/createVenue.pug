@@ -1,0 +1,16 @@
+head
+    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+
+include menu
+
+title Create Venue
+
+form(action='/createVenue/', method='POST', class='form')
+    label(for='venueName') Name:
+    input(type='text', name='venueName', id='venueName', required)
+
+    label(for='venueAddress') Address:
+    input(type='text', name='venueAddress', id='venueAddress', required)
+
+    button(type='submit') Add
+include footer

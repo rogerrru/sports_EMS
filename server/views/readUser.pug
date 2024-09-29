@@ -1,0 +1,54 @@
+head
+  title #{user.firstName} #{user.lastName} - Details
+  link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+
+include menu
+
+h1 #{user.firstName} #{user.lastName} 
+h2 Account Info
+p Email: #{user.email}
+p User Type: #{user.userType}
+p Date Registered: #{user.registrationDate}
+
+h2 Account Profile
+- if (user.departmentName)
+  p Department: #{user.departmentName} - #{user.departmentDesc}
+- else 
+  p
+
+- if (user.organizationName)
+  p Organization: #{user.organizationName}
+- else 
+  p
+
+h3 Events Registered
+if user.registrationIDs.length > 0
+  table
+    thead
+      tr
+        th Event Name
+        th Registration Date
+    tbody
+      each id, index in user.registrationIDs
+        tr
+          td #{user.eventNameReg[index]}
+          td #{user.registration[index]}
+else
+  p No registration record
+
+h3 Events Attended
+if user.attendanceIDs.length > 0
+  table
+    thead
+      tr
+        th Event Name
+        th Attendance Date
+    tbody
+      each id, index in user.attendanceIDs
+        tr
+          td #{user.eventNameAttend[index]}
+          td #{user.attendance[index]}
+else
+  p No attendance record
+
+include footer

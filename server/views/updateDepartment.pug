@@ -1,0 +1,16 @@
+head
+    title #{department.depName} - Update
+    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+
+include menu
+
+form(action=`/updateDepartment/${department.depID}`, method='POST', class='form')
+    label(for='depName') Name:
+    input(type='text', name='depName', id='depName', value=department.depName, required)
+
+    label(for='depDesc') Description:
+    input(type='text', name='depDesc', id='depDesc', value=department.depDesc, required)
+
+    button(type='submit') Save
+
+include footer
