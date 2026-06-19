@@ -1,7 +1,0 @@
-FROM php:latest
-
-# Install MySQL extension
-RUN docker-php-ext-install mysqli pdo pdo_mysql
-
-# Copy PHP client code to the container
-COPY . /var/www/html

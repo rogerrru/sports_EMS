@@ -1,98 +1,81 @@
-head
-    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
-    title #{session.eventName} Session
-include menu
-script(src='https:unpkg.com/html5-qrcode')
+extends layout
+block pageTitle
+  | Scanner – #{session.eventName} – SLU EMS Admin
+block head
+  script(src='https://unpkg.com/html5-qrcode')
+block content
+  a.back-link(href=`/readEvent/${session.eventID}`) ← Back to Event
 
-style
-    | .result {
-    |   background-color: green;
-    |   color: #fff;
-    |   padding: 20px;
-    | }
-    | .row {
-    |   display: flex;
-    | }
+  .page-header
+    h1 QR Scanner
+    .page-actions
+      span(style='font-size:13px;color:#64748b') #{session.eventName} — #{session.sessionDesc}
 
-div.row
-    div.col
-        div(style='width:500px;', id='reader')
-    div.col(style='padding:30px;')
-        h4 SCAN RESULT
-        div#result Result Here
+  if error
+    .alert.alert-error
+      strong ⚠ Scan failed: &nbsp;
+      | #{error}
+  if success
+    .alert.alert-success
+      strong ✓ &nbsp;
+      | #{success}
 
-form(id='qrCodeForm', method='post', action=`/processQRCode/${session.eventID}/${session.sessionID}`)
-    input(type='hidden', name='sessionId', value=session.sessionID)
-    input(type='hidden', id='qrCodeInput', name='qrCodeData')
+  .scanner-layout
+    .card
+      .card-header
+        h2 Scan QR Code
+      .card-body
+        div#reader
+        form#qrCodeForm(method='post', action=`/processQRCode/${session.eventID}/${session.sessionID}`)
+          input(type='hidden', name='sessionId', value=session.sessionID)
+          input(type='hidden', id='qrCodeInput', name='qrCodeData')
 
-script.
-    const scanner = new Html5QrcodeScanner('reader', {
-        // Scanner will be initialized in DOM inside element with id of 'reader'
-        qrbox: {
-            width: 250,
-            height: 250,
-        },  // Sets dimensions of scanning box (set relative to reader element width)
-        fps: 20, // Frames per second to attempt a scan
-    });
+    .card
+      .card-header
+        h2 Session Info
+      .card-body
+        .info-grid
+          .info-item
+            .info-label Event
+            .info-value= session.eventName
+          .info-item
+            .info-label Session
+            .info-value= session.sessionDesc
+          .info-item
+            .info-label Schedule
+            .info-value #{session.firstDay} – #{session.lastDay}
+          .info-item
+            .info-label Time
+            .info-value #{session.startTime} – #{session.endTime}
+          if session.departmentName
+            .info-item
+              .info-label Department
+              .info-value= session.departmentName
+          if session.organizationName
+            .info-item
+              .info-label Organization
+              .info-value= session.organizationName
 
-
-    scanner.render(success, error);
-    // Starts scanner
-
-    function success(result) {
-
-        document.getElementById('result').innerHTML = `
-            <h2>Success!</h2>
-            <p><a href="${result}">${result}</a></p>
-            `;
-        document.getElementById('qrCodeInput').value = result;
-        document.getElementById('qrCodeForm').submit();
-
-        scanner.clear();
-        // Clears scanning instance
-
-    }
-
-    function error(err) {
-        console.error(err);
-        // Prints any errors to the console
-    }
-
-div.row
-    div.col
-        div(style='width:500px;', id='reader2')
-    div.col(style='padding:30px;')
-        h1 #{session.eventName} - #{session.sessionDesc} Session Details
-        p Event Description: #{session.eventDescription}
-        p Event Status: #{session.eventStatus}
-        p Event Category: #{session.eventCategory}
-        - if (session.departmentName)
-            p Department: #{session.departmentName}
-        - else 
-            p
-        - if (session.organizationName)
-            p Organization: #{session.organizationName}
-        - else 
-            p
-
-        h2 Session Details
-        p Schedule: #{session.firstDay} - #{session.lastDay}
-        p Time: #{session.startTime} - #{session.endTime}
-
-        h2 Event Attendance
+        .section-title(style='margin-top:20px') Attendance (#{eventAttendance.length})
         if eventAttendance.length > 0
+          .table-wrap(style='margin-top:12px')
             table
-                thead
-                    tr
-                        th Attendance ID
-                        th User Name
-                        th Attendance Date Time
-                tbody
-                    each attendance in eventAttendance
-                        tr
-                            td #{attendance.attendanceID}
-                            td #{attendance.lastName}, #{attendance.firstName}
-                            td #{attendance.attendanceDateTime}
+              thead
+                tr
+                  th Name
+                  th Date & Time
+              tbody
+                each att in eventAttendance
+                  tr
+                    td #{att.lastName}, #{att.firstName}
+                    td= att.attendanceDateTime
         else
-            p No attendance records for this session
-        include footer
+          p(style='color:#94a3b8;font-size:13.5px;margin-top:12px') No attendance records yet.
+
+  script.
+    const scanner = new Html5QrcodeScanner('reader', { qrbox: { width: 250, height: 250 }, fps: 20 });
+    scanner.render(function(result) {
+      document.getElementById('qrCodeInput').value = result;
+      document.getElementById('qrCodeForm').submit();
+      scanner.clear();
+    }, function(err) { console.error(err); });

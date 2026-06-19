@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Events | SLU EMS</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="assets/media/ScholoLogo.png" type="image/x-icon" />
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js" defer></script>
+</head>
+<body>
+<div id="navbar-placeholder"></div>
+
+<header class="page-header">
+  <h1>Events</h1>
+</header>
+
+<div class="events-page">
+
+  <div class="page-guide">
+    <div class="page-guide-steps">
+      <span class="guide-step"><span class="guide-step-num">1</span> Browse events</span>
+      <span class="guide-arrow">→</span>
+      <span class="guide-step"><span class="guide-step-num">2</span> Click <strong>Read More</strong></span>
+      <span class="guide-arrow">→</span>
+      <span class="guide-step"><span class="guide-step-num">3</span> Register &amp; get your QR</span>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <form id="filter-form">
+      <input type="text" id="search-input" name="search" placeholder="Search events…" />
+      <select id="status-filter" name="status">
+        <option value="">All Statuses</option>
+        <option value="upcoming">Upcoming</option>
+        <option value="ongoing">Ongoing</option>
+        <option value="done">Done</option>
+      </select>
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+  </div>
+
+  <div class="events-grid" id="eventsContainer">
+    <p class="state-msg">Loading events…</p>
+  </div>
+</div>
+
+<footer class="footer">
+  <p class="footer-brand">SLU Events Management System</p>
+  <p>Saint Louis University · Baguio City, Philippines</p>
+  <p class="p2">Sapientia Aedificat &mdash; Wisdom Builds</p>
+</footer>
+
+<script>
+const statusLabel = { upcoming: "Upcoming", ongoing: "Ongoing", done: "Done" };
+const statusBadge = { upcoming: "badge-upcoming", ongoing: "badge-ongoing", done: "badge-done" };
+const categoryLabel = { open: "Open", university: "University", departmental: "Departmental", organizational: "Organizational" };
+
+function gotoEvent(eventId) {
+  sessionStorage.setItem("viewEventID", String(eventId));
+  window.location.href = "event.html?id=" + eventId;
+}
+
+async function loadEvents() {
+  const container = document.getElementById("eventsContainer");
+  const search = document.getElementById("search-input").value;
+  const status = document.getElementById("status-filter").value;
+
+  const params = {};
+  if (search) params.search = search;
+  if (status) params.status = status;
+
+  container.innerHTML = "<p class='state-msg'>Loading…</p>";
+  try {
+    const events = await window.API.public.events(params);
+
+    if (!events.length) {
+      container.innerHTML = "<p class='state-msg'>No events found.</p>";
+      return;
+    }
+
+    container.innerHTML = events.map((e) => {
+      const badge = `<span class="badge ${statusBadge[e.eventStatus] || 'badge-upcoming'}">${statusLabel[e.eventStatus] || window.Page.escHtml(e.eventStatus)}</span>`;
+      const meta = [
+        e.startDate ? `<span>📅 ${window.Page.formatDate(e.startDate)}${e.endDate ? " – " + window.Page.formatDate(e.endDate) : ""}</span>` : "",
+        e.venueName ? `<span>📍 ${window.Page.escHtml(e.venueName)}</span>` : "",
+        e.eventCategory ? `<span>🏷 ${categoryLabel[e.eventCategory] || window.Page.escHtml(e.eventCategory)}</span>` : "",
+      ].filter(Boolean).join("");
+
+      return `
+        <article class="event-card">
+          <div class="event-card-img">
+            ${e.event_img ? `<img src="data:image/jpeg;base64,${e.event_img}" alt="${window.Page.escHtml(e.eventName)}" loading="lazy" />` : '<div class="event-card-img-placeholder">No Image</div>'}
+            <span class="event-card-badge">${badge}</span>
+          </div>
+          <div class="event-card-body">
+            <h3 class="event-card-title">${window.Page.escHtml(e.eventName)}</h3>
+            <div class="event-card-meta">${meta}</div>
+            <p class="event-card-desc">${window.Page.escHtml((e.description || "").substring(0, 100))}${(e.description || "").length > 100 ? "…" : ""}</p>
+            <div class="event-card-footer">
+              <button class="btn btn-primary btn-sm read-more-btn" data-event-id="${e.eventID}">Read More →</button>
+            </div>
+          </div>
+        </article>`;
+    }).join("");
+
+    container.querySelectorAll(".read-more-btn").forEach((btn) => {
+      btn.addEventListener("click", () => gotoEvent(btn.dataset.eventId));
+    });
+
+  } catch (err) {
+    container.innerHTML = `<p class='state-msg'>Error loading events: ${window.Page.escHtml(err.message)}</p>`;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  window.Page.ready().then(loadEvents);
+  document.getElementById("filter-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    loadEvents();
+  });
+});
+</script>
+</body>
+</html>

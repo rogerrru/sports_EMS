@@ -1,5 +1,10 @@
 {
-  "dependencies": {
-    "html5-qrcode": "^2.3.8"
+  "name": "sports-ems",
+  "version": "1.0.0",
+  "description": "SLU Events Management System",
+  "scripts": {
+    "dev": "cd server && npm run dev",
+    "start": "cd server && node admin.js",
+    "install:all": "cd server && npm install"
   }
 }

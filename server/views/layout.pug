@@ -1,0 +1,35 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    title
+      block pageTitle
+        | Admin – SLU EMS
+    link(rel='stylesheet', href='/styles/styles.css')
+    block head
+  body
+    .admin-wrap
+      aside.sidebar
+        .sidebar-brand
+          .brand-text SLU EMS
+          .brand-sub Admin Panel
+        nav.sidebar-nav
+          a.sidebar-link(href='/events', class=(currentPage === 'events' ? 'active' : ''))
+            span.nav-icon ☰
+            span Events
+          a.sidebar-link(href='/departments', class=(currentPage === 'departments' ? 'active' : ''))
+            span.nav-icon ☰
+            span Departments
+          a.sidebar-link(href='/organizations', class=(currentPage === 'organizations' ? 'active' : ''))
+            span.nav-icon ☰
+            span Organizations
+          a.sidebar-link(href='/users', class=(currentPage === 'users' ? 'active' : ''))
+            span.nav-icon ☰
+            span Users
+        .sidebar-footer
+          a.sidebar-link.logout-link(href='/admin/logout')
+            span.nav-icon ↩
+            span Logout
+      main.main-content
+        block content

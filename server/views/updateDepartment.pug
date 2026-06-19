@@ -1,16 +1,25 @@
-head
-    title #{department.depName} - Update
-    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+extends layout
+block pageTitle
+  | Edit Department – SLU EMS Admin
+block content
+  a.back-link(href='/departments') ← Back to Departments
 
-include menu
+  .page-header
+    h1 Edit: #{department.depName}
 
-form(action=`/updateDepartment/${department.depID}`, method='POST', class='form')
-    label(for='depName') Name:
-    input(type='text', name='depName', id='depName', value=department.depName, required)
+  .card
+    .card-header
+      h2 Department Details
+    .card-body
+      form.form-wrap(action=`/updateDepartment/${department.depID}`, method='POST')
+        .form-group
+          label Department Name
+          input(type='text', name='depName', id='depName', value=department.depName, required)
 
-    label(for='depDesc') Description:
-    input(type='text', name='depDesc', id='depDesc', value=department.depDesc, required)
+        .form-group
+          label Description
+          input(type='text', name='depDesc', id='depDesc', value=department.depDesc, required)
 
-    button(type='submit') Save
-
-include footer
+        .form-actions
+          button.btn.btn-gold(type='submit') Save Changes
+          a.btn.btn-outline(href='/departments') Cancel

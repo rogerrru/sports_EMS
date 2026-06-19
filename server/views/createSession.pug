@@ -1,50 +1,49 @@
-head
-    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
-include menu
+extends layout
+block pageTitle
+  | Create Session – SLU EMS Admin
+block content
+  a.back-link(href=`/readEvent/${event.eventID}`) ← Back to Event
 
-title Create Session
+  .page-header
+    h1 Create Session
 
-// Add formatTime function
-- function formatTime(time) {
-  - const date = new Date(time);
-  - const hours = date.getHours().toString().padStart(2, '0');
-  - const minutes = date.getMinutes().toString().padStart(2, '0');
-  - return `${hours}:${minutes}`;
-- }
+  - const toDateVal = (d) => d ? new Date(d).toISOString().split('T')[0] : ''
+  - const toTimeVal = (t) => t ? String(t).substring(0, 5) : ''
+  - const autoFirstDay  = lastSession ? toDateVal(lastSession.lastDay)  : ''
+  - const autoStartTime = lastSession ? toTimeVal(lastSession.endTime)  : ''
 
-form(action=`/createSession/${event.eventID}`, method='POST', class='form')
-    label(for='sessionDesc') Session Description:
-    input(type='text', name='sessionDesc', id='sessionDesc', required)
+  if lastSession
+    .alert.alert-info(style='margin-bottom:1.6rem')
+      | Auto-filled from previous session — starts where
+      strong  #{lastSession.sessionDesc}
+      |  left off (#{autoFirstDay} at #{autoStartTime})
 
-    label(for='firstDay') First Day:
-    select(name='firstDay', id='firstDay')
-        each schedule in schedules
-            - const startDate = new Date(schedule.startDate);
-            - const endDate = new Date(schedule.endDate);
-            - const currentDate = new Date(startDate);
+  .card
+    .card-header
+      h2 Session Details
+    .card-body
+      form.form-wrap(action=`/createSession/${event.eventID}`, method='POST')
+        .form-group
+          label Session Description
+          input(type='text', name='sessionDesc', id='sessionDesc', required, placeholder='e.g. Day 1 – Morning Session')
 
-            while (currentDate <= endDate) 
-                - const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-                option(value=formattedDate, selected=currentDate.getTime() === new Date(sessions.firstDay).getTime()) #{formattedDate}
-                - currentDate.setDate(currentDate.getDate() + 1);
+        .form-grid
+          .form-group
+            label First Day
+            input(type='date', name='firstDay', id='firstDay', value=autoFirstDay, required)
 
-    label(for='lastDay') Last Day:
-    select(name='lastDay', id='lastDay')
-        each schedule in schedules
-            - const startDate = new Date(schedule.startDate);
-            - const endDate = new Date(schedule.endDate);
-            - const currentDate = new Date(startDate);
+          .form-group
+            label Last Day
+            input(type='date', name='lastDay', id='lastDay', required)
 
-            while (currentDate <= endDate) 
-                - const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-                option(value=formattedDate, selected=currentDate.getTime() === new Date(sessions.lastDay).getTime()) #{formattedDate}
-                - currentDate.setDate(currentDate.getDate() + 1);
+          .form-group
+            label Start Time
+            input(type='time', name='startTime', id='startTime', value=autoStartTime, required)
 
-    label(for='startTime') Start Time:
-    input(type='time', name='startTime', id='startTime', value=formatTime(sessions.startTime), required)
+          .form-group
+            label End Time
+            input(type='time', name='endTime', id='endTime', required)
 
-    label(for='endTime') End Time:
-    input(type='time', name='endTime', id='endTime', value=formatTime(sessions.endTime), required) 
-
-    button(type='submit') Add
-include footer
+        .form-actions
+          button.btn.btn-gold(type='submit') Create Session
+          a.btn.btn-outline(href=`/readEvent/${event.eventID}`) Cancel

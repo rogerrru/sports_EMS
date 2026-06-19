@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register | SLU EMS</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="assets/media/ScholoLogo.png" type="image/x-icon" />
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+</head>
+<body class="auth-page">
+<div class="auth-card">
+  <div class="auth-card-header">
+    <img src="assets/media/ScholoLogo.png" alt="SLU Logo" />
+    <h1>Create Account</h1>
+    <p>Join the SLU Events Management System</p>
+  </div>
+  <div class="auth-card-body">
+    <div id="error-msg" class="alert alert-error"></div>
+    <form id="signup-form" onsubmit="return false;">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input id="firstName" name="firstName" placeholder="Juan" pattern="[A-Za-z]+( [A-Za-z]+)*" required type="text" />
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input id="lastName" name="lastName" placeholder="dela Cruz" pattern="[A-Za-z]+( [A-Za-z]+)*" required type="text" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="depID">Department</label>
+          <select id="depID" name="depName">
+            <option disabled selected value="">Select Department</option>
+            <option value="">Not Part of Any Department</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="orgID">Organization</label>
+          <select id="orgID" name="orgName">
+            <option disabled selected value="">Select Organization</option>
+            <option value="">Not Part of Any Organization</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input id="email" name="email" placeholder="you@slu.edu.ph" required type="email" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" name="password" placeholder="••••••••" required type="password" />
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input id="confirmPassword" name="reenterPassword" placeholder="••••••••" required type="password" />
+        </div>
+      </div>
+      <div class="terms-row">
+        <input id="terms" required type="checkbox" />
+        <label for="terms">I accept all terms &amp; conditions</label>
+      </div>
+      <button id="submit-btn" type="submit" class="btn btn-primary btn-block">Create Account</button>
+    </form>
+    <p class="auth-footer-link">Already have an account? <a href="login.html">Sign in</a></p>
+  </div>
+</div>
+
+<script>
+async function populateDropdowns() {
+  try {
+    const [depts, orgs] = await Promise.all([
+      window.API.public.departments(),
+      window.API.public.organizations(),
+    ]);
+    const depSel = document.getElementById("depID");
+    depts.forEach((d) => {
+      const opt = document.createElement("option");
+      opt.value = d.depID;
+      opt.textContent = d.depName;
+      depSel.insertBefore(opt, depSel.lastElementChild);
+    });
+    const orgSel = document.getElementById("orgID");
+    orgs.forEach((o) => {
+      const opt = document.createElement("option");
+      opt.value = o.orgID;
+      opt.textContent = o.orgName;
+      orgSel.insertBefore(opt, orgSel.lastElementChild);
+    });
+  } catch (_) {}
+}
+
+document.addEventListener("DOMContentLoaded", populateDropdowns);
+
+document.getElementById("signup-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById("error-msg");
+  const btn = document.getElementById("submit-btn");
+  errEl.style.display = "none";
+
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName = document.getElementById("lastName").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const confirm = document.getElementById("confirmPassword").value;
+  const depID = document.getElementById("depID").value || null;
+  const orgID = document.getElementById("orgID").value || null;
+
+  const nameRe = /^[A-Za-z]+(?:\s[A-Za-z]+)*$/;
+  if (!nameRe.test(firstName)) { errEl.textContent = "First name must contain only letters."; errEl.style.display = "block"; return; }
+  if (!nameRe.test(lastName))  { errEl.textContent = "Last name must contain only letters.";  errEl.style.display = "block"; return; }
+  if (password !== confirm)    { errEl.textContent = "Passwords do not match.";               errEl.style.display = "block"; return; }
+
+  btn.disabled = true;
+  btn.textContent = "Creating account…";
+  try {
+    await window.API.auth.signup({ firstName, lastName, email, password, depID, orgID });
+    alert("Registration successful! Please log in.");
+    window.location.href = "login.html";
+  } catch (err) {
+    errEl.textContent = err.message || "Registration failed.";
+    errEl.style.display = "block";
+    btn.disabled = false;
+    btn.textContent = "Create Account";
+  }
+});
+</script>
+</body>
+</html>

@@ -1,18 +1,27 @@
-head
-    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
-include menu
+extends layout
+block pageTitle
+  | Edit Organization – SLU EMS Admin
+block content
+  a.back-link(href='/organizations') ← Back to Organizations
 
-title #{organization.orgName} - Update
+  .page-header
+    h1 Edit: #{organization.orgName}
 
-form(action=`/updateOrganization/${organization.orgID}`, method='POST', class='form')
-    label(for='orgName') Organization Name:
-    input(type='text', name='orgName', id='orgName', value=organization.orgName, required)
+  .card
+    .card-header
+      h2 Organization Details
+    .card-body
+      form.form-wrap(action=`/updateOrganization/${organization.orgID}`, method='POST')
+        .form-group
+          label Organization Name
+          input(type='text', name='orgName', id='orgName', value=organization.orgName, required)
 
-    label(for='SLUorg') Is this an SLU organization?
-    select(name='SLUorg', id='SLUorg', required)
-        option(value='1', selected=organization.SLUorg === '1') Yes
-        option(value='0', selected=organization.SLUorg === '0') No
+        .form-group
+          label Is this an SLU organization?
+          select(name='SLUorg', id='SLUorg', required)
+            option(value='1', selected=organization.SLUorg == 1) Yes
+            option(value='0', selected=organization.SLUorg == 0) No
 
-    button(type='submit') Save
-
-include footer
+        .form-actions
+          button.btn.btn-gold(type='submit') Save Changes
+          a.btn.btn-outline(href='/organizations') Cancel

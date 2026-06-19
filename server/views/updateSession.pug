@@ -1,50 +1,41 @@
-head
-    title Update Session
-    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
-include menu
+extends layout
+block pageTitle
+  | Edit Session – SLU EMS Admin
+block content
+  a.back-link(href=`/updateEvent/${event.eventID}`) ← Back to Event
 
-// Add formatTime function
-- function formatTime(time) {
-  - const date = new Date(time);
-  - const hours = date.getHours().toString().padStart(2, '0');
-  - const minutes = date.getMinutes().toString().padStart(2, '0');
-  - return `${hours}:${minutes}`;
-- }
+  .page-header
+    h1 Edit Session
 
-form(action=`/updateSession/${event.eventID}/${session.sessionID}`, method='POST', class='form')
-    label(for='sessionDesc') Session Description:
-    input(type='text', name='sessionDesc', id='sessionDesc', value=session.sessionDesc, required)
+  - const toDateVal = (d) => d ? new Date(d).toISOString().split('T')[0] : ''
+  - const toTimeVal = (t) => t ? String(t).substring(0, 5) : ''
 
-    label(for='firstDay') First Day:
-    select(name='firstDay', id='firstDay')
-        each schedule in schedules
-            - const startDate = new Date(schedule.startDate);
-            - const endDate = new Date(schedule.endDate);
-            - const currentDate = new Date(startDate);
+  .card
+    .card-header
+      h2 Session Details
+    .card-body
+      form.form-wrap(action=`/updateSession/${event.eventID}/${session.sessionID}`, method='POST')
+        .form-group
+          label Session Description
+          input(type='text', name='sessionDesc', id='sessionDesc', value=session.sessionDesc, required)
 
-            while (currentDate <= endDate) 
-                - const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-                option(value=formattedDate, selected=currentDate.getTime() === new Date(session.firstDay).getTime()) #{formattedDate}
-                - currentDate.setDate(currentDate.getDate() + 1);
+        .form-grid
+          .form-group
+            label First Day
+            input(type='date', name='firstDay', id='firstDay', value=toDateVal(session.firstDay), required)
 
-    label(for='lastDay') Last Day:
-    select(name='lastDay', id='lastDay')
-        each schedule in schedules
-            - const startDate = new Date(schedule.startDate);
-            - const endDate = new Date(schedule.endDate);
-            - const currentDate = new Date(startDate);
+          .form-group
+            label Last Day
+            input(type='date', name='lastDay', id='lastDay', value=toDateVal(session.lastDay), required)
 
-            while (currentDate <= endDate) 
-                - const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-                option(value=formattedDate, selected=currentDate.getTime() === new Date(session.lastDay).getTime()) #{formattedDate}
-                - currentDate.setDate(currentDate.getDate() + 1);
+          .form-group
+            label Start Time
+            input(type='time', name='startTime', id='startTime', value=toTimeVal(session.startTime), required)
 
-    label(for='startTime') Start Time:
-    input(type='time', name='startTime', id='startTime', value=formatTime(session.startTime), required)
+          .form-group
+            label End Time
+            input(type='time', name='endTime', id='endTime', value=toTimeVal(session.endTime), required)
 
-    label(for='endTime') End Time:
-    input(type='time', name='endTime', id='endTime', value=formatTime(session.endTime), required) 
-
-    button(type='submit') Save
-
-include footer
+        .form-actions
+          button.btn.btn-gold(type='submit') Save Changes
+          a.btn.btn-outline(href=`/updateEvent/${event.eventID}`) Cancel

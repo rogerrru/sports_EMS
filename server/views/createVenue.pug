@@ -1,16 +1,25 @@
-head
-    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+extends layout
+block pageTitle
+  | Create Venue – SLU EMS Admin
+block content
+  a.back-link(href='/events') ← Back to Events
 
-include menu
+  .page-header
+    h1 Create Venue
 
-title Create Venue
+  .card
+    .card-header
+      h2 Venue Details
+    .card-body
+      form.form-wrap(action='/createVenue/', method='POST')
+        .form-group
+          label Venue Name
+          input(type='text', name='venueName', id='venueName', required, placeholder='e.g. SLU Gym')
 
-form(action='/createVenue/', method='POST', class='form')
-    label(for='venueName') Name:
-    input(type='text', name='venueName', id='venueName', required)
+        .form-group
+          label Address
+          input(type='text', name='venueAddress', id='venueAddress', required, placeholder='Full address')
 
-    label(for='venueAddress') Address:
-    input(type='text', name='venueAddress', id='venueAddress', required)
-
-    button(type='submit') Add
-include footer
+        .form-actions
+          button.btn.btn-gold(type='submit') Create Venue
+          a.btn.btn-outline(href='/events') Cancel

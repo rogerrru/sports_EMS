@@ -1,65 +1,76 @@
-head
-    title Create Event
-    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+extends layout
+block pageTitle
+  | Create Event – SLU EMS Admin
+block content
+  a.back-link(href='/events') ← Back to Events
 
-include menu
+  .page-header
+    h1 Create New Event
 
-form(action='/createEvent', method='POST', enctype='multipart/form-data', class='form')
-    label(for='eventName') Event Name:
-    input(type='text', name='eventName', id='eventName', required)
+  .card
+    .card-header
+      h2 Event Details
+    .card-body
+      form.form-wrap(action='/createEvent', method='POST', enctype='multipart/form-data')
+        .form-grid
+          .form-group.span-2
+            label Event Name
+            input(type='text', name='eventName', id='eventName', required, placeholder='Enter event name')
 
-    label(for='description') Description:
-    textarea(name='description', id='description', rows='4', required)
+          .form-group.span-2
+            label Description
+            textarea(name='description', id='description', rows='4', required, placeholder='Describe the event…')
 
-    label(for='event_img') Event Image:
-    input(type='file', name='event_img', id='event_img')
+          .form-group
+            label Event Category
+            select(name='eventCategory', id='eventCategory', required)
+              option(value='open') Open
+              option(value='university') University
+              option(value='departmental') Departmental
+              option(value='organizational') Organizational
 
-    label(for='eventCategory') Category:
-    select(name='eventCategory', id='eventCategory', required)
-        option(value='organizational') Organizational
-        option(value='departmental') Departmental
-        option(value='university') University
-        option(value='open') Open
+          .form-group
+            label Status
+            select(name='eventStatus', id='eventStatus', required)
+              option(value='upcoming') Upcoming
+              option(value='ongoing') Ongoing
+              option(value='done') Done
 
-    label(for='eventStatus') Status:
-    select(name='eventStatus', id='eventStatus', required)
-        option(value='upcoming') Upcoming
-        option(value='ongoing') Ongoing
-        option(value='done') Done
+          .form-group
+            label Department
+            select(name='depID', id='depID')
+              option(value='') None
+              each department in departments
+                option(value=department.depID)= department.depName
 
-    div(id='departmentSection' style='display: block;')
-        label(for='depID') Department:
-        select(name='depID', id='depID')
-            option(value='') None
-            each department in departments
-                option(value=department.depID) #{department.depName}
-    
-    div(id='organizationSection' style='display: block;')
-        label(for='orgID') Organization:
-        select(name='orgID', id='orgID')
-            option(value='') None
-            each org in organizations
-                option(value=org.orgID) #{org.orgName}
+          .form-group
+            label Organization
+            select(name='orgID', id='orgID')
+              option(value='') None
+              each org in organizations
+                option(value=org.orgID)= org.orgName
 
-    div(id='scheduleSection' style='display: block;')
-        label(for='scheduleID') Schedule:
-        select(name='scheduleID', id='scheduleID')
-            option(value='') None
-            each schedule in schedules
-                - const formattedStartDate = `${schedule.startDate.getFullYear()}-${String(schedule.startDate.getMonth() + 1).padStart(2, '0')}-${String(schedule.startDate.getDate()).padStart(2, '0')}`;
-                - const formattedEndDate = `${schedule.endDate.getFullYear()}-${String(schedule.endDate.getMonth() + 1).padStart(2, '0')}-${String(schedule.endDate.getDate()).padStart(2, '0')}`;
-                option(value=schedule.scheduleID) #{formattedStartDate} - #{formattedEndDate} 
-        a(href='/createSchedule') Create New Schedule
+          .form-group
+            label Start Date
+            input(type='date', name='startDate', required)
 
-    div(id='venuesSection' style='display: block;')
-        label(for='venueID') Venue:
-        select(name='venueID', id='venueID')
-            option(value='') None
-            each venue in venues
-                option(value=venue.venueID) #{venue.venueName} - #{venue.venueAddress}
-        a(href='/createVenue') Create New Venue 
-        
-    button(type='submit') Add
+          .form-group
+            label End Date
+            input(type='date', name='endDate', required)
 
-include footer
-    
+          .form-group
+            label
+              | Venue &nbsp;
+              a.btn.btn-sm.btn-outline(href='/createVenue', target='_blank') + New
+            select(name='venueID', id='venueID')
+              option(value='') None
+              each venue in venues
+                option(value=venue.venueID) #{venue.venueName} — #{venue.venueAddress}
+
+          .form-group.span-2
+            label Event Image
+            input(type='file', name='event_img', id='event_img', required)
+
+        .form-actions
+          button.btn.btn-gold(type='submit') Create Event
+          a.btn.btn-outline(href='/events') Cancel

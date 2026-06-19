@@ -1,129 +1,188 @@
-# Event Management System
+# SLU Events Management System
 
-This project consists of modules designed for managing users, events, and organizations within an event management system.
+A web-based event management platform for Saint Louis University — Baguio City. It lets students browse events, register with a QR code, and attend sessions, while admins manage events, sessions, organizations, departments, venues, and attendance through a dedicated panel.
 
-## Modules
+---
 
-### User Module
+## Tech Stack
 
-#### Public Part (Without Session handling)
+| Layer | Technology |
+|---|---|
+| Backend / Admin panel | Node.js + Express, Pug templates |
+| Client frontend | Vanilla HTML/CSS/JS (static, no build step) |
+| Database | PostgreSQL via Supabase |
+| Session store | connect-pg-simple (PostgreSQL-backed) |
+| Image storage | Base64 in `event_img TEXT` column |
+| QR generation | `qrcode` npm package (server-side) |
+| QR scanning | `html5-qrcode` (CDN, admin scanner view) |
+| File uploads | Multer (disk storage, base64-converted) |
 
-- Provides general information about events accessible without login
-- Allows users to create their own accounts by visiting the registration page and providing necessary information
-- Displays an overview page showcasing the latest events for users
+---
 
-#### User Part (With Session handling)
+## Project Structure
 
-- Allows users to log in to their accounts, either created by an admin or through self-registration
-- Enables users to view all upcoming and ongoing events
-- Allows users to join or cancel event registrations
-- Provides QR Codes for registered events (via email or within the application)
-- Enables users to edit their profiles
+```
+sports_EMS/
+├── client/                  # Static frontend (served by Live Server / any static host)
+│   ├── index.html           # Landing page
+│   ├── events.html          # Public events list
+│   ├── event.html           # Event detail + registration
+│   ├── myEvents.html        # User's registrations + QR codes
+│   ├── login.html
+│   ├── signup.html
+│   ├── account.html
+│   ├── js/
+│   │   ├── config.js        # API base URL
+│   │   ├── api.js           # fetch wrappers
+│   │   └── main.js          # auth, navbar, helpers (window.Page)
+│   └── assets/
+│       ├── style.css
+│       └── media/
+│
+├── server/                  # Express app (port 3000)
+│   ├── admin.js             # Entry point, middleware, route mounting
+│   ├── db.js                # PostgreSQL pool, mysqlToPg(), camelizeRows()
+│   ├── schema.pg.sql        # PostgreSQL schema (safe to re-run)
+│   ├── migrate.js           # Runs schema.pg.sql against the DB
+│   ├── seed.js              # Optional seed data
+│   ├── middleware/
+│   │   └── auth.js          # requireAuth / requireAdmin
+│   ├── routes/
+│   │   ├── adminRoutes.js   # All admin-panel HTML routes
+│   │   ├── public.js        # GET /api/public/* (no auth)
+│   │   ├── user.js          # GET|POST|DELETE /api/user/* (client session)
+│   │   └── auth.js          # /api/auth/login|logout|me|signup
+│   ├── views/               # Pug templates for admin panel
+│   ├── assets/
+│   │   ├── styles/styles.css
+│   │   └── scripts/readEvent.js
+│   ├── .env.example
+│   └── package.json
+│
+├── readme_img/              # Screenshots for this README
+├── .gitignore
+└── package.json             # Root-level dev convenience scripts
+```
 
-### Admin Module
+---
 
-#### User Management
+## Local Development Setup
 
-- Allows admin to view all user accounts
-- Permits admin to create user accounts and their respective credentials
-- Facilitates editing of user account details
-- Allows admin to delete user accounts
-- Provides options to view, create, edit, and delete organizations
-- Offers functionality to manage departments within organizations
+### 1. Clone the repo
 
-#### Event Management
+```bash
+git clone <repo-url>
+cd sports_EMS
+```
 
-- Enables admin to create events
-- Allows editing of event details, setting its type (private or public), or category (organization-specific or not), and managing registration status
-- Provides reports for events, including registrations and attendance
-- Enables admin to delete events
-- Allows checking attendance per session for event attendees
+### 2. Configure environment variables
 
-## Screenshots (Website)
+```bash
+cp server/.env.example server/.env
+```
 
-![Public Events](readme_img/readme_public.jpg)
-*Public Events Page*
+Edit `server/.env`:
 
-![User Dashboard](readme_img/readme_user.jpg)
-*User Dashboard*
+```env
+DATABASE_URL=postgresql://postgres:<password>@<host>:5432/postgres
+SESSION_SECRET=some-long-random-string
+CLIENT_ORIGIN=http://localhost:5500
+PORT=3000
+```
 
-![User Event](readme_img/readme_userevent.jpg)
-*User Event Page*
+`DATABASE_URL` points to your Supabase project. Find it in the Supabase dashboard under **Settings → Database → Connection string → URI**.
 
-![Admin Panel](readme_img/readme_admin.jpg)
-*Admin Panel*
+### 3. Run the database migration
 
-## Installation
+```bash
+cd server
+node migrate.js
+```
 
-To set up the system locally, follow these steps:
+This creates all tables in the `sports_ems` schema. It is idempotent — safe to run multiple times.
 
-1. Clone the repository: `git clone https://gitlab.com/rogerru/Dynamite-final.git`
-2. Install dependencies: `npm install` or `yarn install`
-3. Configure the necessary environment variables
-4. Run the application: `npm start` or `yarn start`
+### 4. (Optional) Seed sample data
 
-## Usage
+```bash
+node seed.js
+```
 
-- Access the application through the provided URL
-- Use appropriate credentials to log in as an admin or a user
-- Explore the functionalities available for each module
+### 5. Install server dependencies and start
+
+```bash
+npm install
+npm run dev        # nodemon auto-restarts on file changes
+```
+
+The Express server runs on **http://localhost:3000**.
+
+### 6. Serve the client
+
+Open the `client/` folder with **VS Code Live Server** (right-click `index.html` → *Open with Live Server*). It defaults to **http://localhost:5500**.
+
+---
+
+## Access Points
+
+| URL | Description |
+|---|---|
+| `http://localhost:5500` | Client frontend (Live Server) |
+| `http://localhost:3000/admin/login` | Admin panel login |
+| `http://localhost:3000/api/public/events` | Public events API |
+| `http://localhost:3000/health` | Server health check |
+
+---
+
+## Event Categories & Access Control
+
+| Category | Who can view | Who can register |
+|---|---|---|
+| Open | Everyone | Any logged-in user |
+| University | Everyone | Users with `@slu.edu.ph` email |
+| Departmental | Everyone | Users in the host department |
+| Organizational | Everyone | Members of the host organization |
+
+Registration is also blocked when an event has no sessions scheduled yet.
+
+---
+
+## Key Features
+
+### Client (Student-facing)
+- Browse all events with search and status filter
+- Event detail page with sessions, venue, category, and eligibility info
+- One-click registration (eligibility enforced server-side)
+- QR code generated on registration — shown in **My Events**
+- Forfeit (cancel) registration for upcoming/ongoing events
+
+### Admin Panel
+- Full CRUD for Events, Sessions, Departments, Organizations, Venues, Users
+- Inline date pickers for event schedule (start/end date)
+- Create Session auto-fills first day + start time from the previous session
+- QR scanner for session attendance check-in
+- Clear scan feedback: success with attendee name, or specific error (wrong event, already checked in, invalid QR)
+- Attendance list per session
+
+---
+
+## Environment Variables Reference
+
+| Variable | Description | Default |
+|---|---|---|
+| `DATABASE_URL` | PostgreSQL connection string | — |
+| `SESSION_SECRET` | Secret for session signing | `dev-secret-change-in-production` |
+| `CLIENT_ORIGIN` | Comma-separated allowed CORS origins | `http://localhost:5500` |
+| `PORT` | Express listen port | `3000` |
+| `NODE_ENV` | Set to `production` for secure cookies | — |
+
+---
 
 ## Authors
 
-- Bullong, Dyna Marie
-- Celedio, Chris Isaiah
-- Chegyem, Roger Jr.
-- De Guzman, Alastair Zeph
-- Decena, Alexcious Norlan 
-- Javier, Aliyah Jenelle
-- Payad, Simchoni
-
-
-
-## Environment Setup
-
-### For "public" package:
-
-1. Start WampServer.
-2. Import Dynamite-database.sql:
-    - If importing via phpMyAdmin, navigate to the import tab, import the self-contained SQL file; the database will be created automatically.
-    - If using MySQL Workbench, ensure the database is named "dynamite-database" and import the self-contained SQL file.
-3. Open `httpd-vhosts.conf`.
-4. Modify the Document Root and Directory to the project directory.
-5. Access the project via `localhost/public/index.php`.
-
-### For "server" package:
-
-1. Install Node.js from [here](https://nodejs.org/en/download/) (LTS -> Windows Installer).
-2. Start WampServer.
-3. Import Dynamite-database.sql (same as steps in "public" package).
-4. Navigate to the ‘server’ folder in the project via terminal/CMD.
-5. Execute the commands `npm i multer` and `npm i fs` for necessary image handling/rendering.
-6. Run the Node.js server by typing `node admin.js`.
-7. Open a browser and enter `http://localhost:3000/events` to load the website.
-
-### For Virtual Hosting using Wamp:
-
-1. Start WampServer.
-2. Configure the `httpd-vhosts.conf`:
-   <VirtualHost *:80>
-   ServerName dynamite.com
-   ServerAlias dynamite.com
-   DocumentRoot "D:/Dynamite-final"
-   <Directory "D:/Dynamite-final">
-   Options +Indexes +Includes +FollowSymLinks +MultiViews
-   AllowOverride All
-   Order allow,deny
-   Allow from all
-   Require all granted
-   </Directory>
-   </VirtualHost>
-3. Edit the hosts file located at `C:\Windows\System32\drivers\etc` using a text editor to include the server's IP address and website name.
-4. Restart WampServer.
-
-Make sure to replace paths, server names, and other specifics with your actual configurations.
-
-## Dependencies
-- wamp version 3.2.4.9 or higher
-- php version 8.2.0 or higher
-- node.js version v20.9.0 or higher
+- Bullong, Dyna Marie  
+- Celedio, Chris Isaiah  
+- Chegyem, Roger Jr.  
+- De Guzman, Alastair Zeph  
+- Decena, Alexcious Norlan  
+- Javier, Aliyah Jenelle  
+- Payad, Simchoni  

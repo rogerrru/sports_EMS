@@ -1,27 +1,34 @@
-head
-    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
-include menu
+extends layout
+block pageTitle
+  | Departments – SLU EMS Admin
+block content
+  .page-header
+    h1 Departments
+    .page-actions
+      a.btn.btn-gold(href='/createDepartment') + New Department
 
-title Departments List
+  .toolbar
+    form.search-form(action='/searchDepartment', method='GET')
+      input(type='text', name='search', placeholder='Search departments…')
+      button.btn.btn-primary(type='submit') Search
 
-form(action='/searchDepartment', method='GET', class='formSearch')
-    input(type='text', name='search', id='search')
-    button(type='submit') ⌕
-
-a.button(href='/createDepartment') Create
-
-table
-    thead
-    tr
-        th Name
-        th Description
-
-    tbody
-    each department in departments
-        tr
-        td= department.depName
-        td= department.depDesc
-        td
-          a(href=`/updateDepartment/${department.depID}`) ✎
-        td
-          a(href=`/deleteDepartment/${department.depID}`) ✖
+  if departments.length
+    .table-wrap
+      table
+        thead
+          tr
+            th Name
+            th Description
+            th Actions
+        tbody
+          each dept in departments
+            tr
+              td= dept.depName
+              td= dept.depDesc
+              td
+                .td-actions
+                  a.btn.btn-primary.btn-sm(href=`/updateDepartment/${dept.depID}`) Edit
+                  a.btn.btn-danger.btn-sm(href=`/deleteDepartment/${dept.depID}`, onclick='return confirm("Delete this department?")') Delete
+  else
+    .empty
+      p No departments found. #[a(href='/createDepartment') Create the first one.]

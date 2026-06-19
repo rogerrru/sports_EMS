@@ -1,41 +1,54 @@
-head
-  title #{user.firstName} #{user.lastName} - Update
-  link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+extends layout
+block pageTitle
+  | Edit User – SLU EMS Admin
+block content
+  a.back-link(href=`/readUser/${user.userID}`) ← Back to User
 
-include menu
+  .page-header
+    h1 Edit: #{user.firstName} #{user.lastName}
 
-form(action=`/updateUser/${user.userID}`, method='POST', class='form')
-  label(for='firstName') First Name:
-  input(type='text', name='firstName', id='firstName', value=user.firstName, required)
+  .card
+    .card-header
+      h2 User Details
+    .card-body
+      form.form-wrap(action=`/updateUser/${user.userID}`, method='POST')
+        .form-grid
+          .form-group
+            label First Name
+            input(type='text', name='firstName', value=user.firstName, required)
 
-  label(for='lastName') Last Name:
-  input(type='text', name='lastName', id='lastName' ,value=user.lastName, required)
+          .form-group
+            label Last Name
+            input(type='text', name='lastName', value=user.lastName, required)
 
-  label(for='password') Password:
-  input(type='password', name='password', id='password', value=user.password, required)
+          .form-group
+            label Email
+            input(type='email', name='email', value=user.email, required)
 
-  label(for='email') Email:
-  input(type='email', name='email', id='email', value=user.email, required)
+          .form-group
+            label New Password
+            input(type='password', name='password', required, placeholder='Enter new password')
 
-  label(for='userType') User Type:
-  select(name='userType', id='userType', required)
-        option(value='admin', selected=user.userType === 'admin') Admin
-        option(value='user', selected=user.userType === 'user') User
+          .form-group
+            label User Type
+            select(name='userType', required)
+              option(value='admin', selected=user.userType === 'admin') Admin
+              option(value='user', selected=user.userType === 'user') User
 
-  div(id='departmentSection' style='display: block;')
-        label(for='depID') Department:
-        select(name='depID', id='depID')
-            option(value='') None
-            each department in departments
-                option(value=department.depID, selected=user.depID === department.depID) #{department.depName}
+          .form-group
+            label Department
+            select(name='depID')
+              option(value='') None
+              each dept in departments
+                option(value=dept.depID, selected=user.depID === dept.depID)= dept.depName
 
-  div(id='organizationSection' style='display: block;')
-        label(for='orgID') Organization:
-        select(name='orgID', id='orgID')
-            option(value='') None
-            each org in organizations
-                option(value=org.orgID, selected=user.orgID === org.orgID) #{org.orgName}
+          .form-group.span-2
+            label Organization
+            select(name='orgID')
+              option(value='') None
+              each org in organizations
+                option(value=org.orgID, selected=user.orgID === org.orgID)= org.orgName
 
-  button(type='submit') Update User
-
-include footer
+        .form-actions
+          button.btn.btn-gold(type='submit') Save Changes
+          a.btn.btn-outline(href=`/readUser/${user.userID}`) Cancel

@@ -1,54 +1,65 @@
-head
-  title #{user.firstName} #{user.lastName} - Details
-  link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+extends layout
+block pageTitle
+  | #{user.firstName} #{user.lastName} – SLU EMS Admin
+block content
+  a.back-link(href='/users') ← Back to Users
 
-include menu
+  .page-header
+    h1 #{user.firstName} #{user.lastName}
+    .page-actions
+      a.btn.btn-primary(href=`/updateUser/${user.userID}`) Edit User
+      a.btn.btn-danger(href=`/deleteUser/${user.userID}`, onclick='return confirm("Delete this user?")') Delete
 
-h1 #{user.firstName} #{user.lastName} 
-h2 Account Info
-p Email: #{user.email}
-p User Type: #{user.userType}
-p Date Registered: #{user.registrationDate}
+  .info-grid
+    .info-item
+      .info-label Email
+      .info-value= user.email
+    .info-item
+      .info-label User Type
+      .info-value
+        span(class='badge ' + (user.userType === 'admin' ? 'badge-upcoming' : 'badge-done'))= user.userType
+    if user.departmentName
+      .info-item
+        .info-label Department
+        .info-value= user.departmentName
+    if user.organizationName
+      .info-item
+        .info-label Organization
+        .info-value= user.organizationName
+    .info-item
+      .info-label Registered
+      .info-value= user.registrationDate
 
-h2 Account Profile
-- if (user.departmentName)
-  p Department: #{user.departmentName} - #{user.departmentDesc}
-- else 
-  p
+  .section-title Events Registered
 
-- if (user.organizationName)
-  p Organization: #{user.organizationName}
-- else 
-  p
+  if user.registrationIDs.length > 0
+    .table-wrap
+      table
+        thead
+          tr
+            th Event Name
+            th Registration Date
+        tbody
+          each id, index in user.registrationIDs
+            tr
+              td= user.eventNameReg[index]
+              td= user.registration[index]
+  else
+    p(style='color:#94a3b8;font-size:13.5px;margin-bottom:24px') No registrations.
 
-h3 Events Registered
-if user.registrationIDs.length > 0
-  table
-    thead
-      tr
-        th Event Name
-        th Registration Date
-    tbody
-      each id, index in user.registrationIDs
-        tr
-          td #{user.eventNameReg[index]}
-          td #{user.registration[index]}
-else
-  p No registration record
+  .section-title Events Attended
 
-h3 Events Attended
-if user.attendanceIDs.length > 0
-  table
-    thead
-      tr
-        th Event Name
-        th Attendance Date
-    tbody
-      each id, index in user.attendanceIDs
-        tr
-          td #{user.eventNameAttend[index]}
-          td #{user.attendance[index]}
-else
-  p No attendance record
-
-include footer
+  if user.attendanceIDs.length > 0
+    .table-wrap
+      table
+        thead
+          tr
+            th Event Name
+            th Attendance Date
+        tbody
+          each id, index in user.attendanceIDs
+            tr
+              td= user.eventNameAttend[index]
+              td= user.attendance[index]
+  else
+    p(style='color:#94a3b8;font-size:13.5px') No attendance records.

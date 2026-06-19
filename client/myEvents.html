@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Events | SLU EMS</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="assets/media/ScholoLogo.png" type="image/x-icon" />
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js" defer></script>
+</head>
+<body>
+<div id="navbar-placeholder"></div>
+
+<div class="my-events-page">
+  <h1 class="my-events-page-title">My Registered Events</h1>
+
+  <div class="page-guide">
+    <div class="page-guide-steps">
+      <span class="guide-step"><span class="guide-step-num">1</span> Find your event below</span>
+      <span class="guide-arrow">→</span>
+      <span class="guide-step"><span class="guide-step-num">2</span> Show your <strong>QR code</strong> at the venue</span>
+      <span class="guide-arrow">→</span>
+      <span class="guide-step"><span class="guide-step-num">3</span> Staff scans it to mark attendance</span>
+    </div>
+  </div>
+
+  <div id="my-events-list">
+    <p class="state-msg">Loading…</p>
+  </div>
+</div>
+
+<footer class="footer">
+  <p class="footer-brand">SLU Events Management System</p>
+  <p>Saint Louis University · Baguio City, Philippines</p>
+  <p class="p2">Sapientia Aedificat &mdash; Wisdom Builds</p>
+</footer>
+
+<script>
+const statusLabel = { upcoming: "Upcoming", ongoing: "Ongoing", done: "Done" };
+const statusBadge = { upcoming: "badge-upcoming", ongoing: "badge-ongoing", done: "badge-done" };
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await window.Page.ready();
+  if (!window.Page.requireLogin()) return;
+
+  const container = document.getElementById("my-events-list");
+
+  async function loadMyEvents() {
+    container.innerHTML = "<p class='state-msg'>Loading…</p>";
+    try {
+      const events = await window.API.user.myEvents();
+      if (!events.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>You have not registered for any events yet.</p>
+            <a href="events.html" class="btn btn-primary">Browse Events</a>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = events.map((e) => {
+        const qrHtml = e.qr_img
+          ? `<div class="my-event-qr">
+               <p class="qr-label">Your Attendance QR</p>
+               <img src="data:image/png;base64,${e.qr_img}" alt="QR Code for ${window.Page.escHtml(e.eventName)}" />
+               <p class="qr-hint">Present this QR at event check-in</p>
+             </div>`
+          : `<div class="my-event-qr my-event-qr-empty">
+               <p class="qr-label">QR Code</p>
+               <p class="qr-hint">QR not available — re-register to generate one</p>
+             </div>`;
+
+        const canForfeit = e.eventStatus !== "done";
+        const forfeitBtn = canForfeit
+          ? `<button class="btn btn-danger btn-sm forfeit-btn" data-reg-id="${e.eventRegID}">Forfeit Registration</button>`
+          : "";
+
+        return `
+          <div class="my-event-card">
+            <div class="my-event-info">
+              <div class="my-event-header">
+                <h3 class="my-event-title">${window.Page.escHtml(e.eventName)}</h3>
+                <span class="badge ${statusBadge[e.eventStatus] || 'badge-upcoming'}">${statusLabel[e.eventStatus] || window.Page.escHtml(e.eventStatus)}</span>
+              </div>
+              <div class="my-event-meta">
+                ${e.startDate ? `<span>📅 ${window.Page.formatDate(e.startDate)}</span>` : ""}
+                ${e.venueName ? `<span>📍 ${window.Page.escHtml(e.venueName)}</span>` : ""}
+                <span>Registered: ${window.Page.formatDate(e.registrationDate)}</span>
+              </div>
+              <div class="my-event-actions">
+                <a href="event.html?id=${e.eventID}" class="btn btn-outline btn-sm">View Event</a>
+                ${forfeitBtn}
+              </div>
+            </div>
+            ${qrHtml}
+          </div>`;
+      }).join("");
+
+      container.querySelectorAll(".forfeit-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (!confirm("Are you sure you want to forfeit this registration? This cannot be undone.")) return;
+          btn.disabled = true;
+          btn.textContent = "Forfeiting…";
+          try {
+            await window.API.user.forfeitEvent(btn.dataset.regId);
+            loadMyEvents();
+          } catch (err) {
+            alert(err.message || "Could not forfeit registration.");
+            btn.disabled = false;
+            btn.textContent = "Forfeit Registration";
+          }
+        });
+      });
+
+    } catch (err) {
+      container.innerHTML = `<p class="state-msg">Error: ${window.Page.escHtml(err.message)}</p>`;
+    }
+  }
+
+  loadMyEvents();
+});
+</script>
+</body>
+</html>

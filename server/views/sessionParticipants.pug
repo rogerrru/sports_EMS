@@ -1,14 +1,29 @@
-title Session Participants
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    title Participants
+    link(rel='stylesheet', href='/styles/styles.css')
+    style.
+      body { padding: 20px; background: #f8f9fb; }
+      h2 { font-size: 18px; font-weight: 700; color: #002744; margin-bottom: 16px; }
+      h2::after { content: ''; display: block; width: 28px; height: 3px; background: #C9A84C; margin-top: 6px; border-radius: 2px; }
+  body
+    h2 Session Participants
 
-h1 Participants
-if participants.length > 0
-  table
-    thead
-      tr
-        th 
-    tbody
-      each participant in participants
-        tr
-          td #{participant.lastName}, #{participant.firstName}
-else
-  p No participants for this session
+    if participants.length > 0
+      .table-wrap
+        table
+          thead
+            tr
+              th #
+              th Name
+          tbody
+            each participant, index in participants
+              tr
+                td= index + 1
+                td #{participant.lastName}, #{participant.firstName}
+    else
+      .empty
+        p No participants for this session.

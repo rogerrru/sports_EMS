@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SLU Events Management System</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="assets/media/ScholoLogo.png" type="image/x-icon" />
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js" defer></script>
+</head>
+<body>
+<div id="navbar-placeholder"></div>
+
+<section class="hero">
+  <div class="hero-inner">
+    <p class="hero-eyebrow">Saint Louis University</p>
+    <h1 class="hero-title">Events <span>Management</span> System</h1>
+    <p class="hero-subtitle" id="hero-subtitle">Discover, join, and manage university events — all in one place.</p>
+    <div class="hero-actions" id="hero-actions">
+      <a href="events.html" class="btn btn-gold">Explore Events</a>
+      <a href="signup.html" class="btn btn-outline">Create Account</a>
+    </div>
+  </div>
+</section>
+
+<div class="stats-strip">
+  <div class="stat-item">
+    <span class="stat-icon">📅</span>
+    <span class="stat-value" id="stat-upcoming">—</span>
+    <span class="stat-label">Upcoming Events</span>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <span class="stat-icon">🎯</span>
+    <span class="stat-value">Easy</span>
+    <span class="stat-label">One-click Registration</span>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <span class="stat-icon">📲</span>
+    <span class="stat-value">QR</span>
+    <span class="stat-label">Attendance Tracking</span>
+  </div>
+</div>
+
+<section class="section section-white">
+  <div class="section-header">
+    <h2 class="section-title">Latest Events</h2>
+    <a href="events.html" class="section-link">View all events <span>→</span></a>
+  </div>
+  <div class="events-grid" id="latest-events-container">
+    <p class="state-msg">Loading latest events…</p>
+  </div>
+</section>
+
+<section class="section section-gray features-section">
+  <div class="section-header">
+    <h2 class="section-title">How It Works</h2>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🔍</div>
+      <h3>1 — Discover Events</h3>
+      <p>Go to <a href="events.html"><strong>Events</strong></a> and browse upcoming university, departmental, and organizational events. Click <strong>Read More</strong> on any event for full details.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">✅</div>
+      <h3>2 — Register Instantly</h3>
+      <p>On the event detail page, click <strong>Register for this Event</strong>. You'll need an account — <a href="signup.html">sign up here</a> if you don't have one yet.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📲</div>
+      <h3>3 — Attend with QR</h3>
+      <p>After registering, open <a href="myEvents.html"><strong>My Events</strong></a> to find your personal QR code. Present it at the event venue — staff will scan it to record your attendance.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p class="footer-brand">SLU Events Management System</p>
+  <p>Saint Louis University · Baguio City, Philippines</p>
+  <p class="p2">Sapientia Aedificat &mdash; Wisdom Builds</p>
+</footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  await window.Page.ready();
+
+  const user = window.Page.currentUser();
+  const heroSubtitle = document.getElementById("hero-subtitle");
+  const heroActions  = document.getElementById("hero-actions");
+
+  if (user) {
+    heroSubtitle.textContent = `Welcome back, ${user.firstName}! See what's happening at SLU.`;
+    heroActions.innerHTML = `
+      <a href="events.html" class="btn btn-gold">Browse Events</a>
+      <a href="myEvents.html" class="btn btn-outline">My Registrations</a>`;
+  }
+
+  const container = document.getElementById("latest-events-container");
+  const statUpcoming = document.getElementById("stat-upcoming");
+  const statusLabel = { upcoming: "Upcoming", ongoing: "Ongoing", done: "Done" };
+  const statusBadge  = { upcoming: "badge-upcoming", ongoing: "badge-ongoing", done: "badge-done" };
+
+  try {
+    const events = await window.API.public.latestEvents();
+
+    // Also fetch count of upcoming events for the stat strip
+    window.API.public.events({ status: "upcoming" }).then((all) => {
+      if (statUpcoming) statUpcoming.textContent = all.length;
+    }).catch(() => {});
+
+    if (!events.length) {
+      container.innerHTML = "<p class='state-msg'>No upcoming events right now.</p>";
+      return;
+    }
+
+    container.innerHTML = events.map((e) => `
+      <article class="event-card">
+        <div class="event-card-img">
+          ${e.event_img ? `<img src="data:image/jpeg;base64,${e.event_img}" alt="${window.Page.escHtml(e.eventName)}" loading="lazy" />` : '<div class="event-card-img-placeholder">No Image</div>'}
+          <span class="event-card-badge badge ${statusBadge[e.eventStatus] || "badge-upcoming"}">${statusLabel[e.eventStatus] || window.Page.escHtml(e.eventStatus)}</span>
+        </div>
+        <div class="event-card-body">
+          <h3 class="event-card-title">${window.Page.escHtml(e.eventName)}</h3>
+          <div class="event-card-meta">
+            ${e.startDate ? `<span>📅 ${window.Page.formatDate(e.startDate)}</span>` : ""}
+          </div>
+          <div class="event-card-footer">
+            <button class="btn btn-outline btn-sm read-more-btn" data-event-id="${e.eventID}">Read More →</button>
+          </div>
+        </div>
+      </article>`).join("");
+
+    container.querySelectorAll(".read-more-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        sessionStorage.setItem("viewEventID", String(btn.dataset.eventId));
+        window.location.href = "event.html?id=" + btn.dataset.eventId;
+      });
+    });
+  } catch {
+    container.innerHTML = "<p class='state-msg'>Could not load events.</p>";
+  }
+});
+</script>
+</body>
+</html>

@@ -1,33 +1,44 @@
-head
-    title Events List
-    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
-body
-    include menu
-      
-    form(action='/searchEvent', method='GET', class='formSearch')
-        input(type='text', name='search', id='search')
-        button(type='submit') ⌕
+extends layout
+block pageTitle
+  | Events – SLU EMS Admin
+block content
+  if error
+    .alert.alert-error= error
+  .page-header
+    h1 Events
+    .page-actions
+      a.btn.btn-outline(href='/createSchedule') + Schedule
+      a.btn.btn-outline(href='/createVenue') + Venue
+      a.btn.btn-gold(href='/createEvent') + New Event
 
-    a.button(href=`/createEvent`) Create
-      
-    table(class="eventsTable")
+  .toolbar
+    form.search-form(action='/searchEvent', method='GET')
+      input(type='text', name='search', placeholder='Search events…')
+      button.btn.btn-primary(type='submit') Search
+
+  if events.length
+    .table-wrap
+      table
         thead
-        tr
+          tr
             th Name
             th Description
             th Status
-
+            th Category
+            th Actions
         tbody
-        each event in events
+          each event in events
             tr
-            td= event.eventName
-            td= event.description
-            td= event.eventStatus
-            td
-              a(href=`/updateEvent/${event.eventID}`) ✎
-            td 
-              a(href=`/deleteEvent/${event.eventID}`) ✖  
-            td
-              a(href=`/readEvent/${event.eventID}`) >
-      
-    include footer
+              td= event.eventName
+              td= event.description
+              td
+                span(class='badge badge-' + event.eventStatus)= event.eventStatus
+              td= event.eventCategory
+              td
+                .td-actions
+                  a.btn.btn-outline.btn-sm(href=`/readEvent/${event.eventID}`) View
+                  a.btn.btn-primary.btn-sm(href=`/updateEvent/${event.eventID}`) Edit
+                  a.btn.btn-danger.btn-sm(href=`/deleteEvent/${event.eventID}`, onclick='return confirm("Delete this event?")') Delete
+  else
+    .empty
+      p No events found. #[a(href='/createEvent') Create the first one.]

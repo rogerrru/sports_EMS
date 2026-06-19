@@ -1,31 +1,40 @@
-head
-    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
-include menu
+extends layout
+block pageTitle
+  | Users – SLU EMS Admin
+block content
+  .page-header
+    h1 Users
+    .page-actions
+      a.btn.btn-gold(href='/createUser') + New User
 
-title User Accounts
+  .toolbar
+    form.search-form(action='/searchUser', method='GET')
+      input(type='text', name='search', placeholder='Search users…')
+      button.btn.btn-primary(type='submit') Search
 
-form(action='/searchUser', method='GET', class='formSearch')
-    input(type='text', name='search', id='search')
-    button(type='submit') ⌕
-
-a.button(href='/createUser') Create
-
-table
-    thead
-    tr
-        th ID
-        th First Name
-        th Last Name
-
-    tbody
-    each user in users
-        tr
-        td= user.userID
-        td= user.firstName
-        td= user.lastName
-        td
-           a(href=`/updateUser/${user.userID}`) ✎
-        td
-           a(href=`/deleteUser/${user.userID}`) ✖
-        td
-           a(href=`/readUser/${user.userID}`) >
+  if users.length
+    .table-wrap
+      table
+        thead
+          tr
+            th ID
+            th Name
+            th Email
+            th Type
+            th Actions
+        tbody
+          each user in users
+            tr
+              td= user.userID
+              td #{user.firstName} #{user.lastName}
+              td= user.email
+              td
+                span(class='badge ' + (user.userType === 'admin' ? 'badge-upcoming' : 'badge-done'))= user.userType
+              td
+                .td-actions
+                  a.btn.btn-outline.btn-sm(href=`/readUser/${user.userID}`) View
+                  a.btn.btn-primary.btn-sm(href=`/updateUser/${user.userID}`) Edit
+                  a.btn.btn-danger.btn-sm(href=`/deleteUser/${user.userID}`, onclick='return confirm("Delete this user?")') Delete
+  else
+    .empty
+      p No users found. #[a(href='/createUser') Create the first one.]

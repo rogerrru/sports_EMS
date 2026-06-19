@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event | SLU EMS</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="assets/media/ScholoLogo.png" type="image/x-icon" />
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js" defer></script>
+</head>
+<body>
+<div id="navbar-placeholder"></div>
+
+<div id="event-detail-root">
+  <p class="state-msg" style="padding:8rem 5%">Loading event…</p>
+</div>
+
+<footer class="footer">
+  <p class="footer-brand">SLU Events Management System</p>
+  <p>Saint Louis University · Baguio City, Philippines</p>
+  <p class="p2">Sapientia Aedificat &mdash; Wisdom Builds</p>
+</footer>
+
+<script>
+const statusLabel = { upcoming: "Upcoming", ongoing: "Ongoing", done: "Done" };
+const statusBadge = { upcoming: "badge-upcoming", ongoing: "badge-ongoing", done: "badge-done" };
+
+function formatTime(t) {
+  if (!t) return "";
+  const [h, m] = t.split(":");
+  const hour = parseInt(h, 10);
+  return `${hour % 12 || 12}:${m} ${hour >= 12 ? "PM" : "AM"}`;
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const root = document.getElementById("event-detail-root");
+
+  // Try URL param first, then sessionStorage fallback (handles Live Server URL rewriting)
+  const urlId = new URLSearchParams(window.location.search).get("id");
+  const id = urlId || sessionStorage.getItem("viewEventID");
+  if (id) sessionStorage.removeItem("viewEventID");
+
+  if (!id) {
+    root.innerHTML = `
+      <div class="event-not-found">
+        <div class="event-not-found-icon">🔍</div>
+        <h2>No event selected</h2>
+        <p>It looks like you arrived here directly. Browse our events list to find something you'd like to attend.</p>
+        <a href="events.html" class="btn btn-primary">Browse All Events →</a>
+      </div>`;
+    return;
+  }
+
+  await window.Page.ready();
+
+  try {
+    const user = window.Page.currentUser();
+    const [event, myRegs] = await Promise.all([
+      window.API.public.event(id),
+      user ? window.API.user.myEvents().catch(() => []) : Promise.resolve([]),
+    ]);
+
+    document.title = `${event.eventName} | SLU EMS`;
+
+    const isRegistered = myRegs.some((r) => String(r.eventID) === String(id));
+    const isDone = event.eventStatus === "done";
+    const hasSessions = event.sessions && event.sessions.length > 0;
+    const ineligibleReason = window.Page.checkEligibility(event, user);
+
+    const accessLabels = {
+      open: "Open to all students",
+      university: "SLU university email required",
+      departmental: "Department members only",
+      organizational: "Organization members only",
+    };
+    const accessLabel = accessLabels[(event.eventCategory || "").toLowerCase()] || event.eventCategory;
+
+    let ctaHtml;
+    if (isDone) {
+      ctaHtml = `<p class="register-closed">This event has ended — registration is closed.</p>`;
+    } else if (!hasSessions) {
+      ctaHtml = `
+        <div class="no-sessions-notice">📅 No sessions have been scheduled yet.</div>
+        <button class="btn btn-ineligible btn-block" disabled>Registration Not Yet Open</button>`;
+    } else if (isRegistered) {
+      ctaHtml = `
+        <button class="btn btn-registered btn-block" disabled>Registered ✓</button>
+        <p class="reg-next-step">🎉 You're in! <a href="myEvents.html">Go to My Events</a> to find your QR code.</p>`;
+    } else if (!user) {
+      ctaHtml = `
+        <a href="login.html" class="btn btn-gold btn-block">Log in to Register</a>
+        <p class="reg-next-step">Don't have an account? <a href="signup.html">Sign up free →</a></p>`;
+    } else if (ineligibleReason) {
+      ctaHtml = `
+        <div class="ineligible-notice">${window.Page.escHtml(ineligibleReason)}</div>
+        <button class="btn btn-ineligible btn-block" disabled>Not Eligible</button>`;
+    } else {
+      ctaHtml = `<button class="btn btn-gold btn-block" id="register-btn">Register for this Event</button>`;
+    }
+
+    const badge = `<span class="badge ${statusBadge[event.eventStatus] || "badge-upcoming"}">${statusLabel[event.eventStatus] || window.Page.escHtml(event.eventStatus)}</span>`;
+    const orgDept = [event.orgName, event.depName].filter(Boolean).map((s) => window.Page.escHtml(s)).join(" &middot; ");
+
+    const sessionsHtml = event.sessions?.length
+      ? event.sessions.map((s) => `
+          <div class="session-card">
+            <div class="session-card-title">${window.Page.escHtml(s.sessionDesc || "Session " + s.sessionID)}</div>
+            <div class="session-card-meta">
+              <span>📅 ${window.Page.formatDate(s.firstDay)}${s.lastDay && s.lastDay !== s.firstDay ? " – " + window.Page.formatDate(s.lastDay) : ""}</span>
+              <span>🕐 ${formatTime(s.startTime)}${s.endTime ? " – " + formatTime(s.endTime) : ""}</span>
+            </div>
+          </div>`).join("")
+      : `<p class="state-msg" style="padding:1.6rem 0;font-size:1.4rem">No sessions scheduled yet.</p>`;
+
+    const infoRows = [
+      event.startDate
+        ? `<div class="info-row"><span class="info-label">Date</span><span class="info-value">${window.Page.formatDate(event.startDate)}${event.endDate ? " &ndash; " + window.Page.formatDate(event.endDate) : ""}</span></div>`
+        : "",
+      event.venueName
+        ? `<div class="info-row"><span class="info-label">Venue</span><span class="info-value">${window.Page.escHtml(event.venueName)}${event.venueAddress ? `<br><small>${window.Page.escHtml(event.venueAddress)}</small>` : ""}</span></div>`
+        : "",
+      event.eventCategory
+        ? `<div class="info-row"><span class="info-label">Category</span><span class="info-value" style="text-transform:capitalize">${window.Page.escHtml(event.eventCategory)}</span></div>
+           <div class="info-row"><span class="info-label">Access</span><span class="info-value">${window.Page.escHtml(accessLabel)}</span></div>`
+        : "",
+      event.orgName
+        ? `<div class="info-row"><span class="info-label">Organization</span><span class="info-value">${window.Page.escHtml(event.orgName)}</span></div>`
+        : "",
+      event.depName
+        ? `<div class="info-row"><span class="info-label">Department</span><span class="info-value">${window.Page.escHtml(event.depName)}</span></div>`
+        : "",
+    ].filter(Boolean).join("");
+
+    // Guide shown only when not yet registered and event is open
+    const showGuide = !isDone && hasSessions && !isRegistered && !ineligibleReason;
+    const guideHtml = showGuide ? `
+      <div class="reg-guide">
+        <p class="reg-guide-title">How to join this event</p>
+        <ol class="reg-guide-steps">
+          <li>Review the details and sessions above</li>
+          <li>Click <strong>Register for this Event</strong> below</li>
+          <li>Open <a href="myEvents.html">My Events</a> to access your QR code</li>
+          <li>Present your QR at the venue for check-in</li>
+        </ol>
+      </div>` : "";
+
+    root.innerHTML = `
+      <div class="back-bar">
+        <a href="events.html" class="back-link">← Back to Events</a>
+      </div>
+
+      <div class="event-detail-hero">
+        ${event.event_img ? `<img src="data:image/jpeg;base64,${event.event_img}" alt="${window.Page.escHtml(event.eventName)}" />` : ""}
+        <div class="event-detail-hero-overlay">
+          <div class="event-detail-hero-badge">${badge}</div>
+          <h1>${window.Page.escHtml(event.eventName)}</h1>
+          ${orgDept ? `<p class="event-detail-hero-sub">${orgDept}</p>` : ""}
+        </div>
+      </div>
+
+      <div class="event-detail-layout">
+        <main class="event-detail-main">
+          <div class="event-detail-section">
+            <h2>About this Event</h2>
+            <p class="event-detail-desc">${window.Page.escHtml(event.description || "No description provided.")}</p>
+          </div>
+          <div class="event-detail-section">
+            <h2>Sessions</h2>
+            ${event.sessions?.length
+              ? `<p class="sessions-hint">The sessions listed below are part of this event. Your registration covers attendance at all sessions.</p>`
+              : ""}
+            <div class="session-list">${sessionsHtml}</div>
+          </div>
+        </main>
+
+        <aside class="event-detail-aside">
+          <div class="info-card">
+            <h3>Event Details</h3>
+            ${infoRows || `<p style="color:var(--gray-400);font-size:1.35rem">No additional details.</p>`}
+          </div>
+          ${guideHtml}
+          <div class="register-card">
+            <h3 id="reg-card-title">${isDone ? "Event Ended" : !hasSessions ? "Coming Soon" : isRegistered ? "You're Registered!" : ineligibleReason ? "Access Restricted" : "Join this Event"}</h3>
+            <p id="reg-card-sub">${isDone ? "This event has concluded." : !hasSessions ? "Sessions haven't been scheduled yet. Check back soon." : isRegistered ? "Check My Events for your QR code." : ineligibleReason ? "You do not meet the eligibility requirements." : "Secure your spot now — registration is free."}</p>
+            ${ctaHtml}
+          </div>
+        </aside>
+      </div>`;
+
+    const registerBtn = document.getElementById("register-btn");
+    if (registerBtn) {
+      registerBtn.addEventListener("click", async () => {
+        registerBtn.disabled = true;
+        registerBtn.textContent = "Registering…";
+        try {
+          await window.API.user.registerEvent(id);
+          registerBtn.textContent = "Registered ✓";
+          registerBtn.className = "btn btn-registered btn-block";
+          document.getElementById("reg-card-title").textContent = "You're Registered!";
+          document.getElementById("reg-card-sub").textContent = "Check My Events for your QR code.";
+          // Show next-step hint
+          const hint = document.createElement("p");
+          hint.className = "reg-next-step";
+          hint.innerHTML = '🎉 Done! <a href="myEvents.html">Go to My Events →</a> to find your QR code.';
+          registerBtn.after(hint);
+        } catch (err) {
+          alert(err.message || "Registration failed. Please try again.");
+          registerBtn.disabled = false;
+          registerBtn.textContent = "Register for this Event";
+        }
+      });
+    }
+
+  } catch (err) {
+    root.innerHTML = `
+      <div class="event-not-found">
+        <div class="event-not-found-icon">⚠️</div>
+        <h2>Could not load event</h2>
+        <p>${window.Page.escHtml(err.message || "Something went wrong.")}</p>
+        <a href="events.html" class="btn btn-primary">Browse All Events →</a>
+      </div>`;
+  }
+});
+</script>
+</body>
+</html>

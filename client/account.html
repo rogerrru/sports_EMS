@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Account | SLU EMS</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="assets/media/ScholoLogo.png" type="image/x-icon" />
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js" defer></script>
+</head>
+<body>
+<div id="navbar-placeholder"></div>
+
+<div class="account-page">
+  <h1 class="account-page-title">My Account</h1>
+  <div class="account-card">
+    <div class="account-card-header">
+      <h2>Profile Information</h2>
+      <p>Update your personal details below</p>
+    </div>
+    <div class="account-card-body">
+      <div id="account-msg" class="alert"></div>
+      <form id="account-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input id="firstName" type="text" required />
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input id="lastName" type="text" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input id="email" type="email" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="depName">Department</label>
+            <input id="depName" type="text" readonly />
+          </div>
+          <div class="form-group">
+            <label for="orgName">Organization</label>
+            <input id="orgName" type="text" readonly />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <p class="footer-brand">SLU Events Management System</p>
+  <p>Saint Louis University · Baguio City, Philippines</p>
+  <p class="p2">Sapientia Aedificat &mdash; Wisdom Builds</p>
+</footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  await window.Page.ready();
+  if (!window.Page.requireLogin()) return;
+
+  const msgEl = document.getElementById("account-msg");
+
+  try {
+    const user = await window.API.user.account();
+    document.getElementById("firstName").value = user.firstName || "";
+    document.getElementById("lastName").value  = user.lastName  || "";
+    document.getElementById("email").value     = user.email     || "";
+    document.getElementById("depName").value   = user.depName   || "N/A";
+    document.getElementById("orgName").value   = user.orgName   || "N/A";
+  } catch {
+    msgEl.className = "alert alert-error";
+    msgEl.textContent = "Could not load account information.";
+    msgEl.style.display = "block";
+  }
+
+  document.getElementById("account-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msgEl.style.display = "none";
+    const data = {
+      firstName: document.getElementById("firstName").value.trim(),
+      lastName:  document.getElementById("lastName").value.trim(),
+      email:     document.getElementById("email").value.trim(),
+    };
+    try {
+      await window.API.user.updateAccount(data);
+      msgEl.className = "alert alert-success";
+      msgEl.textContent = "Account updated successfully.";
+      msgEl.style.display = "block";
+    } catch (err) {
+      msgEl.className = "alert alert-error";
+      msgEl.textContent = err.message || "Update failed.";
+      msgEl.style.display = "block";
+    }
+  });
+});
+</script>
+</body>
+</html>

@@ -1,16 +1,25 @@
-head
-    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
-    title Create Department
+extends layout
+block pageTitle
+  | Create Department – SLU EMS Admin
+block content
+  a.back-link(href='/departments') ← Back to Departments
 
-body
-    include menu
-    form(action='/createDepartment', method='POST', class='form')
-        label(for='depName') Department Name:
-        input(type='text', name='depName', id='depName', required)
+  .page-header
+    h1 Create Department
 
-        label(for='depDesc') Department Description:
-        textarea(name='depDesc', id='depDesc', rows='4', required)
+  .card
+    .card-header
+      h2 Department Details
+    .card-body
+      form.form-wrap(action='/createDepartment', method='POST')
+        .form-group
+          label Department Name
+          input(type='text', name='depName', id='depName', required, placeholder='e.g. College of Engineering')
 
-        button(type='submit') Add
-    include footer
+        .form-group
+          label Description
+          textarea(name='depDesc', id='depDesc', rows='4', required, placeholder='Brief description of the department…')
 
+        .form-actions
+          button.btn.btn-gold(type='submit') Create Department
+          a.btn.btn-outline(href='/departments') Cancel

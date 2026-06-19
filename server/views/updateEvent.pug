@@ -1,83 +1,107 @@
-head
-    title #{event.eventName} - Update
-    link(rel='stylesheet', type='text/css', href='/styles/styles.css')
+extends layout
+block pageTitle
+  | Edit Event – SLU EMS Admin
+block head
+  script(src='/scripts/readEvent.js')
+block content
+  a.back-link(href=`/readEvent/${event.eventID}`) ← Back to Event
 
-include menu
+  .page-header
+    h1 Edit: #{event.eventName}
 
-form(action=`/updateEvent/${event.eventID}`, method='POST', enctype='multipart/form-data', class='form')
-    label(for='eventName') Event Name:
-    input(type='text', name='eventName', id='eventName', value=event.eventName, required)
+  .card
+    .card-header
+      h2 Event Details
+    .card-body
+      form.form-wrap(action=`/updateEvent/${event.eventID}`, method='POST', enctype='multipart/form-data')
+        .form-grid
+          .form-group.span-2
+            label Event Name
+            input(type='text', name='eventName', value=event.eventName, required)
 
-    label(for='description') Description:
-    textarea(name='description', id='description', rows='4', required)= event.description
+          .form-group.span-2
+            label Description
+            textarea(name='description', rows='4', required)= event.description
 
-    label(for='event_img') Event Image:
-    input(type='file', name='event_img', id='event_img') 
-    if event.event_img
-       img(src='data:image/jpeg;base64, ' + event.event_img, alt='Event Image')
-    else 
-        p 
+          .form-group
+            label Category
+            select(name='eventCategory', required)
+              option(value='open', selected=event.eventCategory === 'open') Open
+              option(value='university', selected=event.eventCategory === 'university') University
+              option(value='departmental', selected=event.eventCategory === 'departmental') Departmental
+              option(value='organizational', selected=event.eventCategory === 'organizational') Organizational
 
-    label(for='eventStatus') Status:
-    select(name='eventStatus', id='eventStatus', required)
-        option(value='upcoming', selected=event.eventStatus === 'upcoming') Upcoming
-        option(value='ongoing', selected=event.eventStatus === 'ongoing') Ongoing
-        option(value='done', selected=event.eventStatus === 'done') Done
+          .form-group
+            label Status
+            select(name='eventStatus', required)
+              option(value='upcoming', selected=event.eventStatus === 'upcoming') Upcoming
+              option(value='ongoing', selected=event.eventStatus === 'ongoing') Ongoing
+              option(value='done', selected=event.eventStatus === 'done') Done
 
-    label(for='eventCategory') Category:
-    select(name='eventCategory', id='eventCategory', required)
-        option(value='open', selected=event.eventCategory === 'open') Open
-        option(value='university', selected=event.eventCategory === 'university') University
-        option(value='departmental', selected=event.eventCategory === 'departmental') Departmental
-        option(value='organizational', selected=event.eventCategory === 'organizational') Organizational
+          .form-group
+            label Department
+            select(name='depID')
+              option(value='') None
+              each dept in departments
+                option(value=dept.depID, selected=event.depID === dept.depID)= dept.depName
 
-    div(id='departmentSection' style='display: block;')
-        label(for='depID') Department:
-        select(name='depID', id='depID')
-            option(value='') None
-            each department in departments
-                option(value=department.depID, selected=event.depID === department.depID) #{department.depName}
-    
-    div(id='organizationSection' style='display: block;')
-        label(for='orgID') Organization:
-        select(name='orgID', id='orgID')
-            option(value='') None
-            each org in organizations
-                option(value=org.orgID, selected=event.orgID === org.orgID) #{org.orgName}
-    
-    div(id='scheduleSection' style='display: block;')
-        label(for='scheduleID') Schedule:
-        select(name='scheduleD', id='scheduleID')
-            option(value='') None
-            each schedule in schedules
-                - const formattedStartDate = `${schedule.startDate.getFullYear()}-${String(schedule.startDate.getMonth() + 1).padStart(2, '0')}-${String(schedule.startDate.getDate()).padStart(2, '0')}`;
-                - const formattedEndDate = `${schedule.endDate.getFullYear()}-${String(schedule.endDate.getMonth() + 1).padStart(2, '0')}-${String(schedule.endDate.getDate()).padStart(2, '0')}`;
-                option(value=schedule.scheduleID, selected=event.scheduleID == schedule.scheduleD) #{formattedStartDate} - #{formattedEndDate}
+          .form-group
+            label Organization
+            select(name='orgID')
+              option(value='') None
+              each org in organizations
+                option(value=org.orgID, selected=event.orgID === org.orgID)= org.orgName
 
-    div(id='venuesSection' style='display: block;')
-        label(for='venueID') Venue:
-        select(name='venueID', id='venueID')
-            option(value='') None
-            each venue in venues
-                option(value=venue.venueID, selected=event.venueID === venue.venueID) #{venue.venueName} - #{venue.venueAddress}
-    
-    if event.sessionIDs.length > 0
-        table
-            thead
-                tr
-                th Session
-                th Day/s
-                th Time
-            tbody
-                each sessionId, index in event.sessionIDs
-                    tr
-                        td #{event.sessionDescs[index]}
-                        td #{event.firstDays[index]} - #{event.lastDays[index]}
-                        td #{event.startTimes[index]} - #{event.endTimes[index]}
-                        td
-                            a(href=`/updateSession/${event.eventID}/${sessionId}`) Edit 
-                            a(href=`/deleteSession/${event.eventID}/${sessionId}`) Delete
-    else
-        p No sessions available for this event
-    button(type='submit') Save
-include footer
+          - const startVal = event.startDate ? new Date(event.startDate).toISOString().split('T')[0] : ''
+          - const endVal   = event.endDate   ? new Date(event.endDate).toISOString().split('T')[0]   : ''
+          input(type='hidden', name='scheduleID', value=event.scheduleID || '')
+
+          .form-group
+            label Start Date
+            input(type='date', name='startDate', value=startVal, required)
+
+          .form-group
+            label End Date
+            input(type='date', name='endDate', value=endVal, required)
+
+          .form-group
+            label Venue
+            select(name='venueID')
+              option(value='') None
+              each venue in venues
+                option(value=venue.venueID, selected=event.venueID === venue.venueID) #{venue.venueName} — #{venue.venueAddress}
+
+          .form-group.span-2
+            label Replace Image (leave blank to keep current)
+            if event.event_img
+              img.img-preview(src='data:image/jpeg;base64,' + event.event_img, alt='Current image')
+            input(type='file', name='event_img')
+
+        .form-actions
+          button.btn.btn-gold(type='submit') Save Changes
+          a.btn.btn-outline(href=`/readEvent/${event.eventID}`) Cancel
+
+  if event.sessionIDs.length > 0
+    .section-title
+      span Sessions
+      a.btn.btn-outline.btn-sm(href=`/createSession/${event.eventID}`) + Add Session
+    .table-wrap
+      table
+        thead
+          tr
+            th Description
+            th Days
+            th Time
+            th Actions
+        tbody
+          each sessionId, index in event.sessionIDs
+            tr
+              td= event.sessionDescs[index]
+              td #{event.firstDays[index]} – #{event.lastDays[index]}
+              td #{event.startTimes[index]} – #{event.endTimes[index]}
+              td
+                .td-actions
+                  a.btn.btn-primary.btn-sm(href=`/updateSession/${event.eventID}/${sessionId}`) Edit
+                  a.btn.btn-danger.btn-sm(href=`/deleteSession/${event.eventID}/${sessionId}`, onclick='return confirm("Delete this session?")') Delete
+  else
+    p.back-link No sessions yet. #[a(href=`/createSession/${event.eventID}`) Add one.]

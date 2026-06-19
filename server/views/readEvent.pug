@@ -1,66 +1,81 @@
-head 
-  title #{event.eventName} - Details
-  link(rel='stylesheet', href='/styles/readEvent.css')
+extends layout
+block pageTitle
+  | #{event.eventName} – SLU EMS Admin
+block head
   script(src='/scripts/readEvent.js')
+block content
+  a.back-link(href='/events') ← Back to Events
 
-include menu
+  .page-header
+    h1= event.eventName
+    .page-actions
+      a.btn.btn-outline(href=`/updateEvent/${event.eventID}`) Edit Event
+      a.btn.btn-danger(href=`/deleteEvent/${event.eventID}`, onclick='return confirm("Delete this event?")') Delete
 
-body 
-  head
-  link(rel='stylesheet', type='text/css', href='/styles/styles.css')
-  
-  h1 #{event.eventName}
-  img(src='data:image/jpeg;base64, ' + event.event_img, alt='Event Image')
+  .info-grid
+    .info-item
+      .info-label Status
+      .info-value
+        span(class='badge badge-' + event.eventStatus)= event.eventStatus
+    .info-item
+      .info-label Category
+      .info-value= event.eventCategory
+    if event.departmentName
+      .info-item
+        .info-label Department
+        .info-value= event.departmentName
+    if event.organizationName
+      .info-item
+        .info-label Organization
+        .info-value= event.organizationName
+    if event.startDate
+      .info-item
+        - const sd = `${event.startDate.getFullYear()}-${String(event.startDate.getMonth()+1).padStart(2,'0')}-${String(event.startDate.getDate()).padStart(2,'0')}`;
+        - const ed = `${event.endDate.getFullYear()}-${String(event.endDate.getMonth()+1).padStart(2,'0')}-${String(event.endDate.getDate()).padStart(2,'0')}`;
+        .info-label Schedule
+        .info-value #{sd} – #{ed}
+    if event.venueName
+      .info-item
+        .info-label Venue
+        .info-value #{event.venueName} — #{event.venueAddress}
 
-  p #{event.description}
-  p Status: #{event.eventStatus}
-  p Category: #{event.eventCategory}
+  if event.description
+    .card
+      .card-header
+        h2 Description
+      .card-body
+        p= event.description
 
-  - if (event.departmentName)
-    p Department: #{event.departmentName} - #{event.departmentDesc}
-  - else 
-    p
-  
-  - if (event.organizationName)
-    p Organization: #{event.organizationName}
-  - else 
-    p
+  if event.event_img
+    .card
+      .card-header
+        h2 Event Image
+      .card-body
+        img.img-preview(src='data:image/jpeg;base64,' + event.event_img, alt=event.eventName, style='max-width:400px;height:auto;')
 
-  - if (event.startDate)
-    - const formattedStartDate = `${event.startDate.getFullYear()}-${String(event.startDate.getMonth() + 1).padStart(2, '0')}-${String(event.startDate.getDate()).padStart(2, '0')}`;
-    - const formattedEndDate = `${event.endDate.getFullYear()}-${String(event.endDate.getMonth() + 1).padStart(2, '0')}-${String(event.endDate.getDate()).padStart(2, '0')}`;
-    p Schedule: #{formattedStartDate} - #{formattedEndDate}
-  - else
-    p Schedule: No available schedule
-  
-  - if (event.venueName)
-    p Venue: #{event.venueName} - #{event.venueAddress}
-  - else 
-    p Venue: No available venue
-
-  a(href=`/createSession/${event.eventID}`)
-    button(type='button') Create New Session
+  .section-title
+    span Sessions
+    a.btn.btn-gold.btn-sm(href=`/createSession/${event.eventID}`) + Add Session
 
   if event.sessionIDs.length > 0
-    table
-      thead
-        tr
-          th Session
-          th Day/s
-          th Time
-      tbody
-        each sessionId, index in event.sessionIDs
+    .table-wrap
+      table
+        thead
           tr
-            td #{event.sessionDescs[index]}
-            td #{event.firstDays[index]} - #{event.lastDays[index]}
-            td #{event.startTimes[index]} - #{event.endTimes[index]}
-            td
-              a(href=`javascript:void(0);`, onclick=`openParticipantsPopup(${event.eventID}, ${sessionId})`) View Participants
-              a(href=`/scanner/${event.eventID}/${sessionId}`) Open Session
+            th Description
+            th Days
+            th Time
+            th Actions
+        tbody
+          each sessionId, index in event.sessionIDs
+            tr
+              td= event.sessionDescs[index]
+              td #{event.firstDays[index]} – #{event.lastDays[index]}
+              td #{event.startTimes[index]} – #{event.endTimes[index]}
+              td
+                .td-actions
+                  a.btn.btn-outline.btn-sm(href='javascript:void(0)', onclick=`openParticipantsPopup(${event.eventID}, ${sessionId})`) Participants
+                  a.btn.btn-primary.btn-sm(href=`/scanner/${event.eventID}/${sessionId}`) Scanner
+                  a.btn.btn-danger.btn-sm(href=`/deleteSession/${event.eventID}/${sessionId}`, onclick='return confirm("Delete session?")') Delete
   else
-    p No sessions available for this event
-
-  include footer
-
-
-    
+    p(style='color:#94a3b8;font-size:13.5px') No sessions yet.
