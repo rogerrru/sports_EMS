@@ -31,3 +31,4 @@ Thumbs.db
 *.wmv
 *.tiff
 *.flv
+server/.env
